@@ -1,0 +1,65 @@
+{
+  "name": "alizharb/laravel-hooks",
+  "description": "A universal extensibility and plugin system for Laravel 12 applications.",
+  "keywords": [
+    "laravel",
+    "hooks",
+    "actions",
+    "filters",
+    "plugin",
+    "events",
+    "wordpress-style"
+  ],
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Ali Harb",
+      "email": "harbzali@gmail.com",
+      "homepage": "https://github.com/AlizHarb"
+    }
+  ],
+  "require": {
+    "php": "^8.5",
+    "illuminate/support": "^12.0",
+    "illuminate/pipeline": "^12.0",
+    "illuminate/view": "^12.0",
+    "illuminate/console": "^12.0",
+    "illuminate/container": "^12.0"
+  },
+  "require-dev": {
+    "orchestra/testbench": "^10.0",
+    "pestphp/pest": "^4.0",
+    "pestphp/pest-plugin-laravel": "^4.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "AlizHarb\\LaravelHooks\\": "src/"
+    },
+    "files": [
+      "src/helpers.php"
+    ]
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "AlizHarb\\LaravelHooks\\Tests\\": "tests/"
+    }
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "AlizHarb\\LaravelHooks\\HookServiceProvider"
+      ],
+      "aliases": {
+        "Hook": "AlizHarb\\LaravelHooks\\Facades\\Hook"
+      }
+    }
+  },
+  "config": {
+    "sort-packages": true,
+    "allow-plugins": {
+      "pestphp/pest-plugin": true
+    }
+  },
+  "minimum-stability": "dev",
+  "prefer-stable": true
+}

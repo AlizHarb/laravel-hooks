@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Laravel Hooks Documentation</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+
+    <script
+      defer
+      src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"
+    ></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/tokyo-night-dark.min.css"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      :root {
+        --bg-1: #ffffff; --bg-2: #f9fafb; --bg-3: #f3f4f6;
+        --text-1: #111827; --text-2: #6b7280; --text-3: #9ca3af;
+        --accent: #f43f5e; --accent-light: #fb7185; --border: #e5e7eb;
+      }
+      [x-cloak] { display: none !important; }
+      .dark {
+        --bg-1: #0d1117; --bg-2: #161b22; --bg-3: #21262d;
+        --text-1: #e6edf3; --text-2: #8b949e; --text-3: #6e7681;
+        --accent: #f43f5e; --accent-light: #fb7185; --border: #30363d;
+      }
+      body {
+        font-family: "Inter", sans-serif; background: var(--bg-1);
+        color: var(--text-1); line-height: 1.6; transition: background 0.3s, color 0.3s;
+      }
+      .header {
+        position: fixed; top: 0; left: 0; right: 0; height: 60px;
+        background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(12px);
+        border-bottom: 1px solid var(--border); z-index: 1000;
+      }
+      .dark .header { background: rgba(13, 17, 23, 0.8); }
+      .header-inner {
+        max-width: 1400px; margin: 0 auto; height: 100%; padding: 0 1.5rem;
+        display: flex; align-items: center; justify-content: space-between; gap: 1.5rem;
+      }
+      .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--text-1); }
+      .logo-icon {
+        width: 32px; height: 32px; background: linear-gradient(135deg, var(--accent), var(--accent-light));
+        border-radius: 8px; display: flex; align-items: center; justify-content: center;
+        color: white; font-weight: 800; font-size: 14px;
+      }
+      .logo-text { font-size: 18px; font-weight: 700; }
+      .search-btn {
+        flex: 1; max-width: 400px; padding: 8px 12px; background: var(--bg-2);
+        border: 1px solid var(--border); border-radius: 8px; display: flex;
+        align-items: center; gap: 10px; cursor: pointer; transition: all 0.2s;
+      }
+      .search-btn:hover { border-color: var(--accent); }
+      .search-btn-text { flex: 1; color: var(--text-3); font-size: 14px; }
+      .kbd {
+        padding: 3px 6px; background: var(--bg-3); border: 1px solid var(--border);
+        border-radius: 4px; font-size: 11px; font-weight: 600; color: var(--text-2);
+        font-family: "JetBrains Mono", monospace;
+      }
+      .search-modal {
+        position: fixed; inset: 0; z-index: 2000; display: flex; align-items: flex-start;
+        justify-content: center; padding: 10vh 1rem 1rem; background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(4px);
+      }
+      .search-container {
+        width: 100%; max-width: 600px; background: var(--bg-1);
+        border: 1px solid var(--border); border-radius: 12px;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3); overflow: hidden;
+      }
+      .search-input-wrapper {
+        padding: 1rem; border-bottom: 1px solid var(--border);
+        display: flex; align-items: center; gap: 10px;
+      }
+      .search-input {
+        flex: 1; background: transparent; border: none; font-size: 16px;
+        color: var(--text-1); outline: none;
+      }
+      .search-results { max-height: 400px; overflow-y: auto; }
+      .search-section {
+        padding: 8px 16px; font-size: 11px; font-weight: 700; text-transform: uppercase;
+        letter-spacing: 0.5px; color: var(--text-3); background: var(--bg-2);
+      }
+      .search-result {
+        padding: 12px 16px; cursor: pointer; border-bottom: 1px solid var(--border);
+        transition: background 0.2s;
+      }
+      .search-result:hover { background: var(--bg-2); }
+      .result-title { font-weight: 600; color: var(--text-1); font-size: 14px; margin-bottom: 4px; }
+      .result-snippet { font-size: 13px; color: var(--text-2); }
+      .highlight { background: rgba(244, 63, 94, 0.2); color: var(--accent); font-weight: 600; }
+      .search-empty { padding: 3rem 1rem; text-align: center; color: var(--text-3); }
+      .icon-btn {
+        width: 36px; height: 36px; border-radius: 8px; background: var(--bg-2);
+        border: 1px solid var(--border); display: flex; align-items: center; justify-content: center;
+        cursor: pointer; transition: all 0.2s; color: var(--text-2);
+      }
+      .icon-btn:hover { background: var(--bg-3); color: var(--accent); }
+      .layout { display: flex; margin-top: 60px; max-width: 1400px; margin-left: auto; margin-right: auto; }
+      .sidebar {
+        width: 240px; flex-shrink: 0; height: calc(100vh - 60px); position: sticky;
+        top: 60px; overflow-y: auto; padding: 2rem 1rem; border-right: 1px solid var(--border);
+      }
+      .nav-section { margin-bottom: 1.5rem; }
+      .nav-title {
+        font-size: 11px; font-weight: 700; text-transform: uppercase;
+        letter-spacing: 0.5px; color: var(--text-3); margin-bottom: 8px; padding: 0 8px;
+      }
+      .nav-link {
+        display: flex; align-items: center; gap: 8px; padding: 8px; color: var(--text-2);
+        text-decoration: none; font-size: 14px; font-weight: 500; border-radius: 6px;
+        transition: all 0.2s; margin-bottom: 2px;
+      }
+      .nav-link:hover { background: var(--bg-2); color: var(--text-1); }
+      .nav-link.active { background: var(--accent); color: white; font-weight: 600; }
+      .nav-icon { width: 16px; height: 16px; }
+      .content-wrapper { flex: 1; display: flex; min-width: 0; }
+      .content { flex: 1; padding: 2.5rem; max-width: 800px; }
+      .jump-menu { width: 220px; flex-shrink: 0; padding: 2rem 1rem; }
+      .jump-menu-inner { position: sticky; top: 80px; max-height: calc(100vh - 160px); overflow-y: auto; }
+      .jump-title { font-size: 12px; font-weight: 700; color: var(--text-3); margin-bottom: 12px; text-transform: uppercase; }
+      .jump-list { list-style: none; }
+      .jump-link {
+        display: block; padding: 6px 0 6px 12px; color: var(--text-2); text-decoration: none;
+        font-size: 13px; border-left: 2px solid transparent; transition: all 0.2s;
+      }
+      .jump-link:hover { color: var(--accent); border-left-color: var(--accent); }
+      .jump-link.active { color: var(--accent); border-left-color: var(--accent); font-weight: 600; }
+      .prose h1 { font-size: 2.25rem; font-weight: 800; line-height: 1.2; margin-bottom: 1.5rem; }
+      .prose h2 { font-size: 1.75rem; font-weight: 700; margin-top: 2.5rem; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border); }
+      .prose p { margin: 1rem 0; color: var(--text-2); }
+      .prose a { color: var(--accent); text-decoration: none; font-weight: 500; }
+      .prose code { background: var(--bg-3); padding: 2px 6px; border-radius: 4px; font-family: "JetBrains Mono", monospace; color: var(--accent); }
+      .prose pre { background: #1a1b26; padding: 1.25rem; border-radius: 8px; overflow-x: auto; margin: 1.25rem 0; }
+      .prose pre code { background: transparent; padding: 0; color: inherit; font-size: 14px; }
+      .next-steps { margin: 3rem 0; padding: 2rem; background: linear-gradient(135deg, var(--bg-2), var(--bg-3)); border-radius: 12px; border: 1px solid var(--border); }
+      .next-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; }
+      .next-card { padding: 1.5rem; background: var(--bg-1); border: 1px solid var(--border); border-radius: 10px; text-decoration: none; display: flex; flex-direction: column; gap: 0.5rem; transition: all 0.3s; }
+      .next-card:hover { transform: translateY(-4px); box-shadow: 0 8px 20px rgba(0,0,0,0.1); border-color: var(--accent); }
+      .next-card-icon { width: 40px; height: 40px; background: linear-gradient(135deg, var(--accent), var(--accent-light)); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; margin-bottom: 0.5rem; }
+      .next-card-title { font-weight: 700; color: var(--text-1); }
+      .next-card-desc { font-size: 0.875rem; color: var(--text-2); }
+      .footer { margin-top: 0; padding: 3rem 2.5rem 2rem; background: linear-gradient(135deg, var(--bg-2), var(--bg-3)); border-top: 1px solid var(--border); }
+      .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 2rem; margin-bottom: 2rem; }
+      .footer-section h4 { font-weight: 700; margin-bottom: 1rem; color: var(--text-1); }
+      .footer-link { display: block; font-size: 14px; color: var(--text-2); text-decoration: none; margin-bottom: 0.5rem; }
+      .footer-link:hover { color: var(--accent); }
+      .footer-bottom { padding-top: 2rem; border-top: 1px solid var(--border); display: flex; justify-content: space-between; color: var(--text-3); font-size: 13px; }
+      
+      @media (max-width: 1024px) {
+        .sidebar { position: fixed; left: -280px; top: 60px; z-index: 999; background: var(--bg-1); transition: left 0.3s; box-shadow: 4px 0 12px rgba(0,0,0,0.1); }
+        .sidebar.open { left: 0; }
+        .jump-menu { display: none; }
+      }
+    </style>
+  </head>
+  <body x-data="docsApp()" x-init="init()" :class="{ 'dark': darkMode }">
+    <header class="header">
+      <div class="header-inner">
+        <button @click="sidebarOpen = !sidebarOpen" class="icon-btn mobile-menu-btn" style="display: none;">
+           <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+        </button>
+        <a href="./" class="logo">
+          <div class="logo-icon">LH</div>
+          <span class="logo-text">Laravel Hooks</span>
+        </a>
+        <div class="search-btn" @click="searchOpen = true">
+          <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+          <span class="search-btn-text">Search...</span>
+          <span class="kbd">⌘K</span>
+        </div>
+        <div style="display: flex; gap: 0.75rem">
+           <a href="../examples/" style="color:var(--text-2);text-decoration:none;font-weight:500;font-size:14px;display:flex;align-items:center;">Examples</a>
+           <button @click="darkMode = !darkMode" class="icon-btn">
+             <svg x-show="!darkMode" width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+             <svg x-show="darkMode" width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+           </button>
+        </div>
+      </div>
+    </header>
+
+    <div x-show="searchOpen" x-cloak class="search-modal" @click.self="searchOpen = false" @keydown.escape.window="searchOpen = false">
+      <div class="search-container">
+        <div class="search-input-wrapper">
+          <input type="text" class="search-input" placeholder="Search documentation..." x-model="searchQuery" @input="search()" x-ref="searchInput" />
+        </div>
+        <div class="search-results">
+           <template x-for="(section, sectionName) in groupedResults" :key="sectionName">
+             <div>
+               <div class="search-section" x-text="sectionName"></div>
+               <template x-for="result in section" :key="result.id">
+                 <div class="search-result" @click="goToResult(result)">
+                   <div class="result-title" x-text="result.title"></div>
+                   <div class="result-snippet" x-html="result.snippet"></div>
+                 </div>
+               </template>
+             </div>
+           </template>
+        </div>
+      </div>
+    </div>
+
+    <div class="layout">
+      <aside class="sidebar" :class="{ 'open': sidebarOpen }">
+        <div class="nav-section">
+          <div class="nav-title">Getting Started</div>
+          <a href="#" @click.prevent="loadPage('introduction')" class="nav-link" :class="{ 'active': currentPage === 'introduction' }">Introduction</a>
+          <a href="#" @click.prevent="loadPage('installation')" class="nav-link" :class="{ 'active': currentPage === 'installation' }">Installation</a>
+          <a href="#" @click.prevent="loadPage('basics')" class="nav-link" :class="{ 'active': currentPage === 'basics' }">Basic Usage</a>
+        </div>
+        <div class="nav-section">
+          <div class="nav-title">Advanced</div>
+          <a href="#" @click.prevent="loadPage('advanced')" class="nav-link" :class="{ 'active': currentPage === 'advanced' }">Advanced Features</a>
+          <a href="#" @click.prevent="loadPage('async')" class="nav-link" :class="{ 'active': currentPage === 'async' }">Async & Queue</a>
+        </div>
+        <div class="nav-section">
+          <div class="nav-title">Ecosystem</div>
+          <a href="#" @click.prevent="loadPage('ecosystem')" class="nav-link" :class="{ 'active': currentPage === 'ecosystem' }">Safe DX & Compilation</a>
+          <a href="#" @click.prevent="loadPage('integrations')" class="nav-link" :class="{ 'active': currentPage === 'integrations' }">Integrations</a>
+        </div>
+        <div class="nav-section">
+          <div class="nav-title">Tooling</div>
+          <a href="#" @click.prevent="loadPage('cli')" class="nav-link" :class="{ 'active': currentPage === 'cli' }">CLI Commands</a>
+        </div>
+      </aside>
+
+      <div class="content-wrapper">
+        <main class="content">
+          <article id="content" class="prose">
+             <div style="text-align: center; padding: 3rem; color: var(--text-3);">Loading...</div>
+          </article>
+          <div id="next-steps"></div>
+        </main>
+        <aside class="jump-menu">
+          <div class="jump-menu-inner">
+            <div class="jump-title">On This Page</div>
+            <ul class="jump-list" id="jump-list"></ul>
+          </div>
+        </aside>
+      </div>
+    </div>
+
+    <footer class="footer">
+      <div class="footer-content">
+        <div class="footer-grid">
+           <div class="footer-section">
+             <h4>Laravel Hooks</h4>
+             <p>Production-ready extensibility system for Laravel 12.</p>
+           </div>
+           <div class="footer-section">
+             <h4>Resources</h4>
+             <a href="https://github.com/AlizHarb/laravel-hooks" class="footer-link">GitHub</a>
+             <a href="../examples/" class="footer-link">Examples</a>
+           </div>
+        </div>
+        <div class="footer-bottom">
+           <div>© 2026 Ali Harb. All rights reserved.</div>
+           <div>Laravel Hooks v1.0.0</div>
+        </div>
+      </div>
+    </footer>
+
+    <script>
+      function docsApp() {
+        return {
+          darkMode: localStorage.getItem("darkMode") === "true",
+          currentPage: "introduction",
+          sidebarOpen: false,
+          searchOpen: false,
+          searchQuery: "",
+          searchResults: [],
+          groupedResults: {},
+          allContent: {},
+          pageTitles: {
+            introduction: "Introduction",
+            installation: "Installation",
+            basics: "Basic Usage",
+            advanced: "Advanced Features",
+            async: "Async & Queue",
+            ecosystem: "Ecosystem & Safe DX",
+            integrations: "Integrations",
+            cli: "CLI Tooling"
+          },
+          nextSteps: {
+            introduction: [
+              { title: "Installation", desc: "Get started via Composer", page: "installation", icon: "M12 4v16m8-8H4" }
+            ],
+            installation: [
+              { title: "Basic Usage", desc: "Learn actions and filters", page: "basics", icon: "M13 10V3L4 14h7v7l9-11h-7z" }
+            ],
+            basics: [
+              { title: "Advanced Features", desc: "Typed hooks, wildcards, pipelines", page: "advanced", icon: "M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" }
+            ],
+            advanced: [
+              { title: "Ecosystem", desc: "Signatures, Deprecations, Compilation", page: "ecosystem", icon: "M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" }
+            ],
+            ecosystem: [
+              { title: "Integrations", desc: "Eloquent, Debugbar, Blade", page: "integrations", icon: "M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 00-1-1H4a2 2 0 110-4h1a1 1 0 001-1V7a1 1 0 011-1h3a1 1 0 001-1V4z" }
+            ],
+            integrations: [
+              { title: "CLI Tooling", desc: "Artisan commands", page: "cli", icon: "M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" }
+            ]
+          },
+          init() {
+            this.$watch("darkMode", val => localStorage.setItem("darkMode", val));
+            this.$watch("searchOpen", val => {
+               if(val) setTimeout(() => this.$refs.searchInput.focus(), 100);
+               else { this.searchQuery = ""; this.searchResults = []; }
+            });
+            this.preloadPages();
+            this.loadPage("introduction");
+            window.addEventListener("scroll", () => this.updateActiveJump());
+            document.addEventListener("keydown", e => {
+               if((e.metaKey || e.ctrlKey) && e.key === "k") { e.preventDefault(); this.searchOpen = true; }
+            });
+          },
+          async preloadPages() {
+             const pages = ["introduction", "installation", "basics", "advanced", "async", "ecosystem", "integrations", "cli"];
+             for(const p of pages) {
+                try {
+                  const res = await fetch(`${p}.md`);
+                  if(res.ok) this.allContent[p] = await res.text();
+                } catch(e) {}
+             }
+          },
+          async loadPage(page) {
+             this.currentPage = page;
+             this.sidebarOpen = false;
+             window.scrollTo({ top: 0, behavior: 'smooth' });
+             const contentEl = document.getElementById("content");
+             contentEl.innerHTML = '<div style="text-align: center; padding: 3rem; color: var(--text-3);">Loading...</div>';
+             
+             try {
+               let markdown = this.allContent[page];
+               if(!markdown) {
+                  const res = await fetch(`${page}.md`);
+                  if(!res.ok) throw new Error("Not Found");
+                  markdown = await res.text();
+                  this.allContent[page] = markdown;
+               }
+               contentEl.innerHTML = marked.parse(markdown);
+               contentEl.querySelectorAll("pre code").forEach(block => hljs.highlightElement(block));
+               this.generateJumpMenu();
+               this.generateNextSteps();
+               document.title = `${this.pageTitles[page]} - Laravel Hooks`;
+             } catch(e) {
+               contentEl.innerHTML = '<div style="padding: 2rem; background: var(--bg-2); border-radius: 8px;"><h3>Error</h3><p>Could not load page.</p></div>';
+             }
+          },
+          generateNextSteps() {
+             const el = document.getElementById("next-steps");
+             const steps = this.nextSteps[this.currentPage];
+             if(!steps || !steps.length) { el.innerHTML = ""; return; }
+             let html = '<div class="next-steps"><div class="next-steps-title">Next Steps</div><div class="next-cards">';
+             steps.forEach(s => {
+               html += `<a href="#" onclick="window.docsAppInstance.loadPage('${s.page}'); return false;" class="next-card">
+                 <div class="next-card-icon"><svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${s.icon}"/></svg></div>
+                 <div class="next-card-title">${s.title}</div>
+                 <div class="next-card-desc">${s.desc}</div>
+               </a>`;
+             });
+             el.innerHTML = html + '</div></div>';
+          },
+          generateJumpMenu() {
+            const headings = document.getElementById("content").querySelectorAll("h2, h3");
+            const list = document.getElementById("jump-list");
+            list.innerHTML = "";
+            headings.forEach((h, i) => {
+               h.id = `heading-${i}`;
+               const li = document.createElement("li");
+               const a = document.createElement("a");
+               a.href = `#heading-${i}`;
+               a.className = `jump-link ${h.tagName === 'H3' ? 'level-3' : ''}`;
+               a.textContent = h.textContent;
+               a.onclick = e => { e.preventDefault(); h.scrollIntoView({ behavior: 'smooth', block: 'start' }); };
+               li.appendChild(a);
+               list.appendChild(li);
+            });
+          },
+          updateActiveJump() {
+             const headings = document.querySelectorAll(".prose h2, .prose h3");
+             let current = "";
+             headings.forEach(h => { if(h.getBoundingClientRect().top <= 100) current = h.id; });
+             document.querySelectorAll(".jump-link").forEach(l => {
+                l.classList.toggle("active", l.getAttribute("href") === `#${current}`);
+             });
+          },
+          search() {
+             if(this.searchQuery.length < 2) { this.searchResults = []; return; }
+             const q = this.searchQuery.toLowerCase();
+             const res = [];
+             Object.entries(this.allContent).forEach(([page, content]) => {
+                const lines = content.split("\n");
+                let section = "";
+                lines.forEach((line, i) => {
+                   if(line.startsWith("## ")) section = line.replace("## ", "").trim();
+                   if(line.toLowerCase().includes(q)) {
+                      const clean = line.replace(/[#*`]/g, "").trim();
+                      if(clean) res.push({ 
+                        id: `${page}-${i}`, page, title: section || this.pageTitles[page], 
+                        snippet: clean.substring(0, 80), section: "Results" // simplified grouping
+                      });
+                   }
+                });
+             });
+             // unique
+             this.searchResults = res.filter((v,i,a) => a.findIndex(t => t.snippet === v.snippet) === i).slice(0, 20);
+             this.groupedResults = { "All Results": this.searchResults };
+          },
+          goToResult(r) { this.loadPage(r.page); this.searchOpen = false; }
+        };
+      }
+      let docsAppInstance;
+      document.addEventListener("alpine:init", () => { docsAppInstance = docsApp(); window.docsAppInstance = docsAppInstance; });
+    </script>
+  </body>
+</html>
