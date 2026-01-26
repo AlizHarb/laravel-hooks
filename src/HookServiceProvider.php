@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace AlizHarb\LaravelHooks;
 
-use AlizHarb\LaravelHooks\Bridge\EloquentHookBridge;
-use AlizHarb\LaravelHooks\Commands\{HookCacheCommand, HookClearCommand, HookIdeHelperCommand, HookInspectCommand, HookListCommand};
+use AlizHarb\LaravelHooks\Bridge\{FilamentHookBridge, LivewireHookBridge};
+use AlizHarb\LaravelHooks\Commands\{HookCacheCommand, HookClearCommand, HookGenerateDocsCommand, HookIdeHelperCommand, HookInspectCommand, HookListCommand, HookMonitorCommand};
 use AlizHarb\LaravelHooks\Debugbar\HookCollector;
 use Illuminate\Foundation\Console\AboutCommand;
 use Illuminate\Support\ServiceProvider;
@@ -28,6 +28,12 @@ class HookServiceProvider extends ServiceProvider
             );
         });
 
+        $this->app->singleton(HookDiscoverer::class, function ($app) {
+            return new HookDiscoverer($app->make(HookManager::class));
+        });
+
+        $this->app->singleton(HookCache::class);
+
         $this->app->alias(HookManager::class, 'hooks');
     }
 
@@ -38,6 +44,15 @@ class HookServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        /** @var HookManager $manager */
+        $manager = $this->app->make(HookManager::class);
+
+        // Try loading from cache first
+        if ($cached = $this->app->make(HookCache::class)->get()) {
+            $manager->setFilters($cached['filters'] ?? []);
+            $manager->setWildcardFilters($cached['wildcard_filters'] ?? []);
+        }
+
         if ($this->app->runningInConsole()) {
             $this->publishes([
                 __DIR__.'/../config/hooks.php' => config_path('hooks.php'),
@@ -49,7 +64,14 @@ class HookServiceProvider extends ServiceProvider
                 HookCacheCommand::class,
                 HookClearCommand::class,
                 HookIdeHelperCommand::class,
+                HookMonitorCommand::class,
+                HookGenerateDocsCommand::class,
             ]);
+        }
+
+        // Run discovery if not loaded from cache
+        if (! $manager->isLoaded) {
+            $this->app->make(HookDiscoverer::class)->discover();
         }
 
         if ($this->app->bound('debugbar')) {
@@ -62,15 +84,14 @@ class HookServiceProvider extends ServiceProvider
 
         BladeDirectives::register();
 
-        // View Creator for Overrides (ViewFinder approach recommended for deeper integration)
-        $this->app['view']->creator('*', function ($view) {
-             // Hook system allows overriding views at runtime
-        });
-
-        if (config('hooks.eloquent_bridge', true)) {
-            $this->app->make(EloquentHookBridge::class)->register();
+        if (config('hooks.filament_bridge.enabled', false)) {
+            $this->app->make(FilamentHookBridge::class)->register();
         }
 
-        AboutCommand::add('Laravel Hooks', fn () => ['Version' => '1.0.0', 'Author' => 'Ali Harb']);
+        if (config('hooks.livewire_bridge.enabled', false)) {
+            $this->app->make(LivewireHookBridge::class)->register();
+        }
+
+        AboutCommand::add('Laravel Hooks', fn () => ['Version' => '1.1.0', 'Author' => 'Ali Harb']);
     }
 }

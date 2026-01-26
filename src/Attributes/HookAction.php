@@ -20,5 +20,6 @@ class HookAction
         public string $hook,
         public int $priority = 10,
         public int $acceptedArgs = 1
-    ) {}
+    ) {
+    }
 }

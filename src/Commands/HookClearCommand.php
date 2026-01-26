@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace AlizHarb\LaravelHooks\Commands;
 
-use Illuminate\Console\Command;
 use AlizHarb\LaravelHooks\HookCache;
+use Illuminate\Console\Command;
 
 /**
  * Clears the hook cache.
@@ -25,6 +25,7 @@ class HookClearCommand extends Command
     {
         $cache->forget();
         $this->info('Hook cache cleared.');
+
         return self::SUCCESS;
     }
 }

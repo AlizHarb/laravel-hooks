@@ -23,3 +23,13 @@ You can configure the queue connection and queue name in your job processing set
 ## Performance
 
 Queued actions are serializable. Ensure your arguments (like Models) are serializable or standard scalars.
+
+## Graceful Execution
+
+You can ensure that an action (sync or async) doesn't crash your application if a listener fails.
+
+```php
+Hook::doAction('audit.log', $data)->graceful();
+```
+
+This will log any errors but allow the rest of your listeners and the application to continue.

@@ -1,8 +1,11 @@
 # Laravel Hooks
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/alizharb/laravel-hooks.svg?style=flat-square)](https://packagist.org/packages/alizharb/laravel-hooks)
-[![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/AlizHarb/laravel-hooks/tests.yml?label=tests)](https://github.com/AlizHarb/laravel-hooks/actions)
+[![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/AlizHarb/laravel-hooks/tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/AlizHarb/laravel-hooks/actions?query=workflow%3Atests+branch%3Amain)
+[![GitHub Code Style Action Status](https://img.shields.io/github/actions/workflow/status/AlizHarb/laravel-hooks/php-cs-fixer.yml?branch=main&label=code%20style&style=flat-square)](https://github.com/AlizHarb/laravel-hooks/actions?query=workflow%3A"Check+%26+fix+styling"+branch%3Amain)
+[![Total Downloads](https://img.shields.io/packagist/dt/alizharb/laravel-hooks.svg?style=flat-square)](https://packagist.org/packages/alizharb/laravel-hooks)
 [![License](https://img.shields.io/packagist/l/alizharb/laravel-hooks.svg?style=flat-square)](https://packagist.org/packages/alizharb/laravel-hooks)
+[![PHP Stan](https://img.shields.io/github/actions/workflow/status/AlizHarb/laravel-hooks/phpstan.yml?branch=main&label=PHPStan&style=flat-square)](https://github.com/AlizHarb/laravel-hooks/actions?query=workflow%3APHPStan+branch%3Amain)
 
 **Laravel Hooks** is a production-ready, universal extensibility system for **Laravel 12**. Inspired by WordPress but modernized with **PHP 8.5 attributes**, **Strict Typing**, and **Deep Laravel Integration**.
 

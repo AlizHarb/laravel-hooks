@@ -1,18 +1,20 @@
 <?php
 
-use AlizHarb\LaravelHooks\Facades\Hook;
+namespace Tests\Feature;
+
 use AlizHarb\LaravelHooks\Exceptions\HookSignatureMismatchException;
+use AlizHarb\LaravelHooks\Facades\Hook;
 use Illuminate\Support\Facades\Log;
 
 test('signatures validate arguments', function () {
     Hook::define('strict.hook', ['string', 'int']);
-    
+
     // Valid
     Hook::doAction('strict.hook', 'string', 123);
     expect(true)->toBeTrue();
-    
+
     // Invalid
-    expect(fn() => Hook::doAction('strict.hook', 'string', 'not-int'))
+    expect(fn () => Hook::doAction('strict.hook', 'string', 'not-int'))
         ->toThrow(HookSignatureMismatchException::class);
 });
 
@@ -24,7 +26,7 @@ test('deprecations log warnings', function () {
         });
 
     Hook::deprecate('old.hook', 'new.hook', '1.0');
-    
+
     Hook::doAction('old.hook');
 });
 

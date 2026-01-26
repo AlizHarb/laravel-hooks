@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace AlizHarb\LaravelHooks\Debugbar;
 
+use AlizHarb\LaravelHooks\HookInspector;
 use DebugBar\DataCollector\DataCollector;
 use DebugBar\DataCollector\Renderable;
-use AlizHarb\LaravelHooks\HookInspector;
 
 /**
  * DebugBar DataCollector for Hooks.
@@ -20,7 +20,8 @@ class HookCollector extends DataCollector implements Renderable
      */
     public function __construct(
         protected HookInspector $inspector
-    ) {}
+    ) {
+    }
 
     /**
      * Collect data for the DebugBar.

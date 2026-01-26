@@ -19,3 +19,4 @@ Thumbs.db
 composer.lock
 phpunit.xml
 .phpstorm.meta.php/
+temp/

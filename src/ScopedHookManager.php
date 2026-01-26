@@ -43,6 +43,7 @@ class ScopedHookManager
             if (method_exists($scope, 'getKey')) {
                 return get_class($scope) . '::' . $scope->getKey();
             }
+
             return spl_object_hash($scope);
         }
 
@@ -62,6 +63,7 @@ class ScopedHookManager
     protected function scopedHook(string|BackedEnum $hook): string
     {
         $hookName = $hook instanceof BackedEnum ? (string) $hook->value : $hook;
+
         return "scope::{$this->scopePrefix}::{$hookName}";
     }
 
@@ -72,12 +74,11 @@ class ScopedHookManager
      * @param callable|string|array $callback
      * @param int $priority
      * @param int $acceptedArgs
-     * @return self
+     * @return PendingHookRegistration
      */
-    public function addAction(string|BackedEnum $hook, callable|string|array $callback, int $priority = 10, int $acceptedArgs = 1): self
+    public function addAction(string|BackedEnum $hook, callable|string|array $callback, int $priority = 10, int $acceptedArgs = 1): PendingHookRegistration
     {
-        $this->manager->addAction($this->scopedHook($hook), $callback, $priority, $acceptedArgs);
-        return $this;
+        return $this->manager->addAction($this->scopedHook($hook), $callback, $priority, $acceptedArgs);
     }
 
     /**
@@ -87,12 +88,11 @@ class ScopedHookManager
      * @param callable|string|array $callback
      * @param int $priority
      * @param int $acceptedArgs
-     * @return self
+     * @return PendingHookRegistration
      */
-    public function addFilter(string|BackedEnum $hook, callable|string|array $callback, int $priority = 10, int $acceptedArgs = 1): self
+    public function addFilter(string|BackedEnum $hook, callable|string|array $callback, int $priority = 10, int $acceptedArgs = 1): PendingHookRegistration
     {
-        $this->manager->addFilter($this->scopedHook($hook), $callback, $priority, $acceptedArgs);
-        return $this;
+        return $this->manager->addFilter($this->scopedHook($hook), $callback, $priority, $acceptedArgs);
     }
 
     /**
@@ -100,11 +100,11 @@ class ScopedHookManager
      *
      * @param string|BackedEnum $hook
      * @param mixed ...$args
-     * @return void
+     * @return PendingHookCall
      */
-    public function doAction(string|BackedEnum $hook, mixed ...$args): void
+    public function doAction(string|BackedEnum $hook, mixed ...$args): PendingHookCall
     {
-        $this->manager->doAction($this->scopedHook($hook), ...$args);
+        return $this->manager->doAction($this->scopedHook($hook), ...$args);
     }
 
     /**

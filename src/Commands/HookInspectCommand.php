@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace AlizHarb\LaravelHooks\Commands;
 
-use Illuminate\Console\Command;
 use AlizHarb\LaravelHooks\HookManager;
+use Illuminate\Console\Command;
 
 /**
  * Artisan command to inspect a specific hook and its listeners.
@@ -28,6 +28,7 @@ class HookInspectCommand extends Command
 
         if (! isset($filters[$hookName])) {
             $this->error("No callbacks registered for hook: {$hookName}");
+
             return self::FAILURE;
         }
 
@@ -38,8 +39,8 @@ class HookInspectCommand extends Command
             foreach ($callbacks as $callback) {
                 $callbackName = 'Closure';
                 if (is_array($callback['function'])) {
-                     $class = is_object($callback['function'][0]) ? get_class($callback['function'][0]) : $callback['function'][0];
-                     $callbackName = $class . '@' . $callback['function'][1];
+                    $class = is_object($callback['function'][0]) ? get_class($callback['function'][0]) : $callback['function'][0];
+                    $callbackName = $class . '@' . $callback['function'][1];
                 } elseif (is_string($callback['function'])) {
                     $callbackName = $callback['function'];
                 }
@@ -47,7 +48,7 @@ class HookInspectCommand extends Command
                 $rows[] = [
                     $priority,
                     $callbackName,
-                    $callback['accepted_args']
+                    $callback['accepted_args'],
                 ];
             }
         }

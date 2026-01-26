@@ -13,8 +13,11 @@ Laravel's Event system is powerful but can be heavy for simple data modification
 
 ## Key Features
 
-- ⚡ **Zero Dependencies**: Pure PHP implementation.
-- 🧬 **Attributes**: PHP 8.5+ native attributes support.
-- 🛡️ **Type Safety**: strict signatures and Enums.
+- ⚡ **Discovery Engine**: Automatically discover and register hooks via attributes.
+- 🧬 **Attributes**: PHP 8+ native attributes support.
+- 🧪 **Conditional Hooks**: register hooks that only fire when specific conditions are met.
+- ⚖️ **Strict Mode**: Catch missing hooks and typos during development.
+- 🛡️ **Type Safety**: Strict signatures and Enums support.
 - 🔮 **Debugbar Integration**: Visualize all hooks in Laravel Debugbar.
 - 📦 **Blade Directives**: `@hook` and `@filter` for your views.
+- 🔌 **Eloquent Bridge**: Turn model events into hooks automatically.

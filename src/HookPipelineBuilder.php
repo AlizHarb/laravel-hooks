@@ -18,7 +18,8 @@ class HookPipelineBuilder
     public function __construct(
         protected HookManager $manager,
         protected string $hook
-    ) {}
+    ) {
+    }
 
     /**
      * Set the pipes (filters) for the hook.
@@ -33,17 +34,18 @@ class HookPipelineBuilder
                 if (is_string($pipe)) {
                     $instance = app($pipe);
                     if (method_exists($instance, 'handle')) {
-                        return $instance->handle($content, fn($c) => $c, ...$args);
+                        return $instance->handle($content, fn ($c) => $c, ...$args);
                     }
                 }
 
                 if (is_callable($pipe)) {
-                    return $pipe($content, fn($c) => $c, ...$args);
+                    return $pipe($content, fn ($c) => $c, ...$args);
                 }
 
                 return $content;
             });
         }
+
         return $this;
     }
 }

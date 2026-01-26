@@ -10,16 +10,42 @@ It shows:
 - Duration
 - Arguments
 
-## Eloquent Bridge
+## Eloquent Integration
 
-Automatically map Eloquent events to hooks.
-Enable `eloquent_bridge` in `config/hooks.php`.
+Automatically map Eloquent events to hooks. Use the `HasHooks` trait on your models for cleaner usage.
 
 ```php
-// Listen to any model event
-Hook::addAction('eloquent.saved: App\Models\User', function ($user) {
-    // ...
-});
+// config/hooks.php
+'eloquent_bridge' => [
+    'enabled' => true,
+    'except_models' => [ ... ],
+],
+
+// Usage in model
+use AlizHarb\LaravelHooks\Traits\HasHooks;
+
+class Post extends Model {
+    use HasHooks;
+    
+    // Fires 'model.post.published'
+    $this->fieldAction('published');
+}
+```
+
+## Filament Bridge (v4/v5)
+
+Extend your Filament resources modularly using the `InteractsWithHooks` trait.
+
+```php
+use AlizHarb\LaravelHooks\Traits\InteractsWithHooks;
+
+class OrderResource extends Resource {
+    use InteractsWithHooks;
+
+    public static function table(Table $table): Table {
+        return static::applyTableHooks($table);
+    }
+}
 ```
 
 ## Blade Directives
