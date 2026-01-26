@@ -8,8 +8,11 @@ use Exception;
 
 class HookNotFoundException extends Exception
 {
-    public static function forHook(string $hook): self
+    /**
+     * Create a new HookNotFoundException instance.
+     */
+    public static function make(string $hook): self
     {
-        return new self("Hook [{$hook}] not found or has no registered listeners.");
+        return new self("Hook [{$hook}] has no registered listeners and strict mode is enabled.");
     }
 }

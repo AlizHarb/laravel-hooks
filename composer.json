@@ -14,8 +14,7 @@
   "authors": [
     {
       "name": "Ali Harb",
-      "email": "harbzali@gmail.com",
-      "homepage": "https://github.com/AlizHarb"
+      "email": "harbzali@gmail.com"
     }
   ],
   "require": {
@@ -27,9 +26,26 @@
     "illuminate/container": "^12.0"
   },
   "require-dev": {
-    "orchestra/testbench": "^10.0",
-    "pestphp/pest": "^4.0",
-    "pestphp/pest-plugin-laravel": "^4.0"
+    "orchestra/testbench": "^9.5|^10.0",
+    "pestphp/pest": "*",
+    "pestphp/pest-plugin-laravel": "*",
+    "phpstan/phpstan": "*",
+    "larastan/larastan": "^3.9",
+    "laravel/pint": "^1.24",
+    "friendsofphp/php-cs-fixer": "*",
+    "livewire/livewire": "^4.0",
+    "fruitcake/laravel-debugbar": "^4.0",
+    "laravel/pulse": "^1.2",
+    "filament/filament": "^4.0|^5.0"
+  },
+  "suggest": {
+    "alizharb/laravel-modular": "Build modular Laravel apps with zero configuration.",
+    "alizharb/laravel-themer": "A powerful theme engine for Laravel applications.",
+    "alizharb/laravel-modular-livewire": "Automatic Livewire component discovery and registration.",
+    "alizharb/laravel-modular-filament": "Filament v5 admin panel integration for modules.",
+    "alizharb/laravel-modular-js": "Zero-config JavaScript and assets management for modules.",
+    "alizharb/filament-modular-luncher": "Advanced Filament dashboard launcher for modular projects.",
+    "alizharb/filament-themer-luncher": "Theme management integration for Filament dashboards."
   },
   "autoload": {
     "psr-4": {
@@ -41,7 +57,7 @@
   },
   "autoload-dev": {
     "psr-4": {
-      "AlizHarb\\LaravelHooks\\Tests\\": "tests/"
+      "Tests\\": "tests/"
     }
   },
   "extra": {

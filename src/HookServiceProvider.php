@@ -4,8 +4,15 @@ declare(strict_types=1);
 
 namespace AlizHarb\LaravelHooks;
 
-use AlizHarb\LaravelHooks\Bridge\EloquentHookBridge;
-use AlizHarb\LaravelHooks\Commands\{HookCacheCommand, HookClearCommand, HookIdeHelperCommand, HookInspectCommand, HookListCommand};
+use AlizHarb\LaravelHooks\Bridge\FilamentHookBridge;
+use AlizHarb\LaravelHooks\Bridge\LivewireHookBridge;
+use AlizHarb\LaravelHooks\Commands\HookCacheCommand;
+use AlizHarb\LaravelHooks\Commands\HookClearCommand;
+use AlizHarb\LaravelHooks\Commands\HookGenerateDocsCommand;
+use AlizHarb\LaravelHooks\Commands\HookIdeHelperCommand;
+use AlizHarb\LaravelHooks\Commands\HookInspectCommand;
+use AlizHarb\LaravelHooks\Commands\HookListCommand;
+use AlizHarb\LaravelHooks\Commands\HookMonitorCommand;
 use AlizHarb\LaravelHooks\Debugbar\HookCollector;
 use Illuminate\Foundation\Console\AboutCommand;
 use Illuminate\Support\ServiceProvider;
@@ -14,12 +21,12 @@ class HookServiceProvider extends ServiceProvider
 {
     /**
      * Register any application services.
-     *
-     * @return void
      */
     public function register(): void
     {
         $this->mergeConfigFrom(__DIR__.'/../config/hooks.php', 'hooks');
+
+        $this->app->singleton(HookInspector::class);
 
         $this->app->singleton(HookManager::class, function ($app) {
             return new HookManager(
@@ -28,16 +35,29 @@ class HookServiceProvider extends ServiceProvider
             );
         });
 
+        $this->app->singleton(HookDiscoverer::class, function ($app) {
+            return new HookDiscoverer($app->make(HookManager::class));
+        });
+
+        $this->app->singleton(HookCache::class);
+
         $this->app->alias(HookManager::class, 'hooks');
     }
 
     /**
      * Bootstrap any application services.
-     *
-     * @return void
      */
     public function boot(): void
     {
+        /** @var HookManager $manager */
+        $manager = $this->app->make(HookManager::class);
+
+        // Try loading from cache first
+        if ($cached = $this->app->make(HookCache::class)->get()) {
+            $manager->setFilters($cached['filters'] ?? []);
+            $manager->setWildcardFilters($cached['wildcard_filters'] ?? []);
+        }
+
         if ($this->app->runningInConsole()) {
             $this->publishes([
                 __DIR__.'/../config/hooks.php' => config_path('hooks.php'),
@@ -49,28 +69,36 @@ class HookServiceProvider extends ServiceProvider
                 HookCacheCommand::class,
                 HookClearCommand::class,
                 HookIdeHelperCommand::class,
+                HookMonitorCommand::class,
+                HookGenerateDocsCommand::class,
             ]);
         }
 
+        // Run discovery if not loaded from cache
+        if (! $manager->isLoaded) {
+            $this->app->make(HookDiscoverer::class)->discover();
+        }
+
         if ($this->app->bound('debugbar')) {
-            $this->app['debugbar']->addCollector(
-                new HookCollector(
-                    $this->app->make(HookInspector::class)
-                )
+            /** @var HookInspector $inspector */
+            $inspector = $this->app->make(HookInspector::class);
+            $inspector->enable();
+
+            $this->app->make('debugbar')->addCollector(
+                new HookCollector($inspector)
             );
         }
 
         BladeDirectives::register();
 
-        // View Creator for Overrides (ViewFinder approach recommended for deeper integration)
-        $this->app['view']->creator('*', function ($view) {
-             // Hook system allows overriding views at runtime
-        });
-
-        if (config('hooks.eloquent_bridge', true)) {
-            $this->app->make(EloquentHookBridge::class)->register();
+        if (config('hooks.filament_bridge.enabled', false)) {
+            $this->app->make(FilamentHookBridge::class)->register();
         }
 
-        AboutCommand::add('Laravel Hooks', fn () => ['Version' => '1.0.0', 'Author' => 'Ali Harb']);
+        if (config('hooks.livewire_bridge.enabled', false)) {
+            $this->app->make(LivewireHookBridge::class)->register();
+        }
+
+        AboutCommand::add('Laravel Hooks', fn () => ['Version' => '1.2.0', 'Author' => 'Ali Harb']);
     }
 }

@@ -12,10 +12,12 @@
 .env
 .env.backup
 .env.phpunit
-.phpunit.cache
+.phpunit.cache/
+.phpstan_cache/
 .php-cs-fixer.cache
 .DS_Store
 Thumbs.db
 composer.lock
 phpunit.xml
 .phpstorm.meta.php/
+temp/

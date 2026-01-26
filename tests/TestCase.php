@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace AlizHarb\LaravelHooks\Tests;
+namespace Tests;
 
-use Orchestra\Testbench\TestCase as Orchestra;
-use AlizHarb\LaravelHooks\HookServiceProvider;
 use AlizHarb\LaravelHooks\Facades\Hook;
+use AlizHarb\LaravelHooks\HookServiceProvider;
+use Orchestra\Testbench\TestCase as Orchestra;
 
 class TestCase extends Orchestra
 {

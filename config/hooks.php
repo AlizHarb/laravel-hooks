@@ -26,7 +26,7 @@ return [
     'scan_paths' => [
         app_path('Hooks'),
         app_path('Listeners'),
-        // modules_path(), // Example if using nWidart/laravel-modules
+        function_exists('modules_path') ? modules_path() : null,
     ],
 
     /*
@@ -38,4 +38,98 @@ return [
     |
     */
     'debug' => env('HOOK_DEBUG', false),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Strict Mode
+    |--------------------------------------------------------------------------
+    |
+    | Throw an exception if a hook is called with no listeners.
+    |
+    */
+    'strict' => env('HOOK_STRICT', false),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Eloquent Bridge
+    |--------------------------------------------------------------------------
+    |
+    | Automatically convert Eloquent events into Hook actions.
+    |
+    */
+    'eloquent_bridge' => [
+        'enabled' => env('HOOK_ELOQUENT_BRIDGE', true),
+        'events' => [
+            'eloquent.saved*',
+            'eloquent.created*',
+            'eloquent.deleted*',
+        ],
+        'except_events' => [],
+        'models' => [
+            // 'App\Models\*',
+        ],
+        'except_models' => [
+            // 'App\Models\Job',
+        ],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Filament Bridge
+    |--------------------------------------------------------------------------
+    |
+    | Automatically create hooks for Filament components.
+    |
+    */
+    'filament_bridge' => [
+        'enabled' => env('HOOK_FILAMENT_BRIDGE', false),
+        'tables' => true,
+        'forms' => true,
+        'pages' => true,
+        'widgets' => true,
+        'relation_managers' => true,
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Livewire Bridge
+    |--------------------------------------------------------------------------
+    |
+    | Automatically bridge global Livewire lifecycle events to hooks.
+    |
+    */
+    'livewire_bridge' => [
+        'enabled' => env('HOOK_LIVEWIRE_BRIDGE', false),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Default Behaviors
+    |--------------------------------------------------------------------------
+    |
+    */
+    'graceful_by_default' => false,
+
+    /*
+    | Maximum depth for recursive hook calls to prevent infinite loops.
+    */
+    'max_nesting' => 50,
+
+    /*
+    | Whether to record hook metrics in Laravel Pulse if installed.
+    */
+    'pulse_enabled' => true,
+
+    /*
+    |--------------------------------------------------------------------------
+    | Circuit Breaker
+    |--------------------------------------------------------------------------
+    |
+    | Automatically silence hooks that fail repeatedly within a single request.
+    |
+    */
+    'circuit_breaker' => [
+        'enabled' => env('HOOK_CIRCUIT_BREAKER', true),
+        'threshold' => env('HOOK_CIRCUIT_THRESHOLD', 5),
+    ],
 ];

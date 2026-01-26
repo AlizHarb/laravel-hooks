@@ -23,6 +23,9 @@ Optionally publish the configuration file to customize cache settings and Eloque
 php artisan vendor:publish --tag=hooks-config
 ```
 
+> [!TIP]
+> Make sure to configure the `scan_paths` in your `config/hooks.php` if your hooks are located outside the default `app/Hooks` or `app/Listeners` directories.
+
 ## IDE Helper
 
 To improve your development experience with autocompletion for hooks, generate the metadata file:

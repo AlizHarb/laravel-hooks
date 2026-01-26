@@ -1,4 +1,4 @@
-<?php
+namespace Tests\Unit;
 
 use AlizHarb\LaravelHooks\Facades\Hook;
 use function PHPUnit\Framework\assertEquals;

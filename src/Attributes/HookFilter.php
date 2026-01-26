@@ -12,9 +12,9 @@ class HookFilter
     /**
      * Create a new HookFilter instance.
      *
-     * @param string $hook The hook name.
-     * @param int $priority Priority defaults to 10.
-     * @param int $acceptedArgs Number of accepted arguments.
+     * @param  string  $hook  The hook name.
+     * @param  int  $priority  Priority defaults to 10.
+     * @param  int  $acceptedArgs  Number of accepted arguments.
      */
     public function __construct(
         public string $hook,

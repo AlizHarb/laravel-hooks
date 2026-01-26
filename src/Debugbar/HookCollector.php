@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace AlizHarb\LaravelHooks\Debugbar;
 
+use AlizHarb\LaravelHooks\HookInspector;
 use DebugBar\DataCollector\DataCollector;
 use DebugBar\DataCollector\Renderable;
-use AlizHarb\LaravelHooks\HookInspector;
 
 /**
  * DebugBar DataCollector for Hooks.
@@ -15,8 +15,6 @@ class HookCollector extends DataCollector implements Renderable
 {
     /**
      * Create a new HookCollector instance.
-     *
-     * @param HookInspector $inspector
      */
     public function __construct(
         protected HookInspector $inspector
@@ -24,23 +22,30 @@ class HookCollector extends DataCollector implements Renderable
 
     /**
      * Collect data for the DebugBar.
-     *
-     * @return array
      */
     public function collect(): array
     {
         $history = $this->inspector->getHistory();
+        $hooks = [];
+
+        foreach ($history as $i => $entry) {
+            $key = sprintf('%02d. %s', $i + 1, $entry['hook']);
+            $hooks[$key] = [
+                'value' => $entry['value'],
+                'args' => $entry['args'],
+                'time' => date('H:i:s', (int) $entry['microtime']).'.'.sprintf('%03d', (int) (($entry['microtime'] - (int) $entry['microtime']) * 1000)),
+                'memory' => round($entry['memory'] / 1024 / 1024, 2).' MB',
+            ];
+        }
 
         return [
             'count' => count($history),
-            'hooks' => $history,
+            'hooks' => $hooks,
         ];
     }
 
     /**
      * Get the unique name of the collector.
-     *
-     * @return string
      */
     public function getName(): string
     {
@@ -49,8 +54,6 @@ class HookCollector extends DataCollector implements Renderable
 
     /**
      * Get the widgets for the DebugBar.
-     *
-     * @return array
      */
     public function getWidgets(): array
     {
@@ -59,7 +62,7 @@ class HookCollector extends DataCollector implements Renderable
                 'icon' => 'puzzle-piece',
                 'widget' => 'PhpDebugBar.Widgets.HtmlVariableListWidget',
                 'map' => 'hooks.hooks',
-                'default' => '[]',
+                'default' => '{}',
             ],
             'hooks:badge' => [
                 'map' => 'hooks.count',

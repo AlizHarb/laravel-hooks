@@ -11,9 +11,6 @@ class HookPipelineBuilder
 {
     /**
      * Create a new HookPipelineBuilder instance.
-     *
-     * @param HookManager $manager
-     * @param string $hook
      */
     public function __construct(
         protected HookManager $manager,
@@ -22,9 +19,6 @@ class HookPipelineBuilder
 
     /**
      * Set the pipes (filters) for the hook.
-     *
-     * @param array $pipes
-     * @return self
      */
     public function through(array $pipes): self
     {
@@ -33,17 +27,18 @@ class HookPipelineBuilder
                 if (is_string($pipe)) {
                     $instance = app($pipe);
                     if (method_exists($instance, 'handle')) {
-                        return $instance->handle($content, fn($c) => $c, ...$args);
+                        return $instance->handle($content, fn ($c) => $c, ...$args);
                     }
                 }
 
                 if (is_callable($pipe)) {
-                    return $pipe($content, fn($c) => $c, ...$args);
+                    return $pipe($content, fn ($c) => $c, ...$args);
                 }
 
                 return $content;
             });
         }
+
         return $this;
     }
 }

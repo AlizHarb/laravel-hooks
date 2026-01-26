@@ -218,6 +218,7 @@
           <a href="#" @click.prevent="loadPage('introduction')" class="nav-link" :class="{ 'active': currentPage === 'introduction' }">Introduction</a>
           <a href="#" @click.prevent="loadPage('installation')" class="nav-link" :class="{ 'active': currentPage === 'installation' }">Installation</a>
           <a href="#" @click.prevent="loadPage('basics')" class="nav-link" :class="{ 'active': currentPage === 'basics' }">Basic Usage</a>
+          <a href="#" @click.prevent="loadPage('models')" class="nav-link" :class="{ 'active': currentPage === 'models' }">Dynamic Models</a>
         </div>
         <div class="nav-section">
           <div class="nav-title">Advanced</div>
@@ -266,7 +267,7 @@
         </div>
         <div class="footer-bottom">
            <div>© 2026 Ali Harb. All rights reserved.</div>
-           <div>Laravel Hooks v1.0.0</div>
+           <div>Laravel Hooks v1.2.0</div>
         </div>
       </div>
     </footer>
@@ -289,6 +290,7 @@
             advanced: "Advanced Features",
             async: "Async & Queue",
             ecosystem: "Ecosystem & Safe DX",
+            models: "Dynamic Models",
             integrations: "Integrations",
             cli: "CLI Tooling"
           },
@@ -326,7 +328,7 @@
             });
           },
           async preloadPages() {
-             const pages = ["introduction", "installation", "basics", "advanced", "async", "ecosystem", "integrations", "cli"];
+             const pages = ["introduction", "installation", "basics", "models", "advanced", "async", "ecosystem", "integrations", "cli"];
              for(const p of pages) {
                 try {
                   const res = await fetch(`${p}.md`);

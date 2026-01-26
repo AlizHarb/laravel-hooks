@@ -23,12 +23,15 @@ class HookInspector
     }
 
     /**
+     * Enable the inspector.
+     */
+    public function enable(): void
+    {
+        $this->enabled = true;
+    }
+
+    /**
      * Record a hook execution.
-     *
-     * @param string $hook
-     * @param mixed $value
-     * @param array $args
-     * @return void
      */
     public function record(string $hook, mixed $value, array $args): void
     {
@@ -47,8 +50,6 @@ class HookInspector
 
     /**
      * Get the execution history.
-     *
-     * @return array
      */
     public function getHistory(): array
     {

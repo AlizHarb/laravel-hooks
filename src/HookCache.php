@@ -13,7 +13,9 @@ use Illuminate\Support\Facades\Config;
 class HookCache
 {
     protected string $cacheKey;
+
     protected bool $enabled;
+
     protected string $store;
 
     /**
@@ -28,8 +30,6 @@ class HookCache
 
     /**
      * Retrieve cached hooks.
-     *
-     * @return array|null
      */
     public function get(): ?array
     {
@@ -42,9 +42,6 @@ class HookCache
 
     /**
      * Store hooks in cache.
-     *
-     * @param array $hooks
-     * @return void
      */
     public function put(array $hooks): void
     {
@@ -53,8 +50,6 @@ class HookCache
 
     /**
      * clear the hook cache.
-     *
-     * @return void
      */
     public function forget(): void
     {

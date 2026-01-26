@@ -16,9 +16,8 @@ trait Hookable
     /**
      * Dispatch an action with this instance as the first argument.
      *
-     * @param string $tag The name of the action.
-     * @param mixed ...$args Additional arguments.
-     * @return void
+     * @param  string  $tag  The name of the action.
+     * @param  mixed  ...$args  Additional arguments.
      */
     protected function fireAction(string $tag, mixed ...$args): void
     {
@@ -28,9 +27,8 @@ trait Hookable
     /**
      * Apply filter with this instance as the value.
      *
-     * @param string $tag The name of the filter.
-     * @param mixed ...$args Additional arguments.
-     * @return mixed
+     * @param  string  $tag  The name of the filter.
+     * @param  mixed  ...$args  Additional arguments.
      */
     protected function applyFilter(string $tag, mixed ...$args): mixed
     {

@@ -40,13 +40,36 @@ Hook::addFilter('title', fn($t) => $t . ' (First)', 5);
 Hook::addFilter('title', fn($t) => $t . ' (Last)', 20);
 ```
 
-## Attributes (PHP 8.5)
+## Attributes (PHP 8+)
 
-You can register hooks directly on methods using attributes.
+You can register hooks directly on methods using attributes. This is the recommended way to register hooks as it keeps your logic organized and allows for automatic discovery.
 
 ```php
-class UserObserver {
-    #[HookAction('user.created')]
-    public function onCreated($user) { ... }
+use AlizHarb\LaravelHooks\Attributes\HookAction;
+use AlizHarb\LaravelHooks\Attributes\HookFilter;
+
+class UserObserver 
+{
+    #[HookAction(hook: 'user.created', priority: 20)]
+    public function onCreated($user) 
+    {
+        // Logic here
+    }
+
+    #[HookFilter(hook: 'user.display_name')]
+    public function formatName($name) 
+    {
+        return strtoupper($name);
+    }
 }
+```
+
+### Auto Discovery
+
+The package will automatically scan the paths defined in `config/hooks.php` (specifically the `scan_paths` array) for any classes containing these attributes. By default, it looks in `app/Hooks` and `app/Listeners`.
+
+You can also manually trigger discovery and cache the results for production using:
+
+```bash
+php artisan hook:cache
 ```
