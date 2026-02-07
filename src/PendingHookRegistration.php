@@ -41,4 +41,40 @@ class PendingHookRegistration
     {
         return $this->when(app()->environment($environments));
     }
+
+    /**
+     * Mark the listener to be executed on a queue.
+     * Note: Does not work with Closures.
+     *
+     * @return $this
+     */
+    public function onQueue(?string $connection = null, ?string $queue = null): self
+    {
+        $filters = $this->manager->getFilters();
+        $callback = $filters[$this->hook][$this->priority][$this->id]['function'] ?? null;
+
+        if (! $callback) {
+            throw new \Exception("Could not find registered callback for hook [{$this->hook}] with ID [{$this->id}] at priority [{$this->priority}].");
+        }
+
+        if ($callback instanceof \Closure) {
+            throw new \Exception('Closures cannot be queued in Laravel Hooks. Use a class method or static callback instead.');
+        }
+
+        $this->manager->markAsQueued($this->hook, $this->id, $connection, $queue);
+
+        return $this;
+    }
+
+    /**
+     * Validate the result of the listener.
+     *
+     * @return $this
+     */
+    public function validate(string|\Closure $rules): self
+    {
+        $this->manager->validateListener($this->hook, $this->id, $this->priority, $rules);
+
+        return $this;
+    }
 }

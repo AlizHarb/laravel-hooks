@@ -27,7 +27,7 @@ class HasDynamicHooksTest extends TestCase
     public function test_can_add_dynamic_method(): void
     {
         Hook::model(HookableModel::class)->method('sayHello', function () {
-            /** @var HookableModel $this */
+            /* @var HookableModel $this */
             return 'Hello from '.$this->name;
         });
 
@@ -75,7 +75,7 @@ class HasDynamicHooksTest extends TestCase
             return 'Prefix: '.$value;
         });
 
-        $model = new HookableModel;
+        $model = new HookableModel();
         $model->name = 'Ali';
 
         $this->assertEquals('Prefix: Ali', $model->name);

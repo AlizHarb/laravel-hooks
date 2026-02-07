@@ -1,81 +1,79 @@
 {
-  "name": "alizharb/laravel-hooks",
-  "description": "A universal extensibility and plugin system for Laravel 12 applications.",
-  "keywords": [
-    "laravel",
-    "hooks",
-    "actions",
-    "filters",
-    "plugin",
-    "events",
-    "wordpress-style"
-  ],
-  "license": "MIT",
-  "authors": [
-    {
-      "name": "Ali Harb",
-      "email": "harbzali@gmail.com"
-    }
-  ],
-  "require": {
-    "php": "^8.3",
-    "illuminate/support": "^12.0",
-    "illuminate/pipeline": "^12.0",
-    "illuminate/view": "^12.0",
-    "illuminate/console": "^12.0",
-    "illuminate/container": "^12.0"
-  },
-  "require-dev": {
-    "orchestra/testbench": "^9.5|^10.0",
-    "pestphp/pest": "*",
-    "pestphp/pest-plugin-laravel": "*",
-    "phpstan/phpstan": "*",
-    "larastan/larastan": "^3.9",
-    "laravel/pint": "^1.24",
-    "friendsofphp/php-cs-fixer": "*",
-    "livewire/livewire": "^4.0",
-    "fruitcake/laravel-debugbar": "^4.0",
-    "laravel/pulse": "^1.2",
-    "filament/filament": "^4.0|^5.0"
-  },
-  "suggest": {
-    "alizharb/laravel-modular": "Build modular Laravel apps with zero configuration.",
-    "alizharb/laravel-themer": "A powerful theme engine for Laravel applications.",
-    "alizharb/laravel-modular-livewire": "Automatic Livewire component discovery and registration.",
-    "alizharb/laravel-modular-filament": "Filament v5 admin panel integration for modules.",
-    "alizharb/laravel-modular-js": "Zero-config JavaScript and assets management for modules.",
-    "alizharb/filament-modular-luncher": "Advanced Filament dashboard launcher for modular projects.",
-    "alizharb/filament-themer-luncher": "Theme management integration for Filament dashboards."
-  },
-  "autoload": {
-    "psr-4": {
-      "AlizHarb\\LaravelHooks\\": "src/"
+    "name": "alizharb/laravel-hooks",
+    "description": "A universal extensibility and plugin system for Laravel 12 applications.",
+    "keywords": [
+        "laravel",
+        "hooks",
+        "actions",
+        "filters",
+        "plugin",
+        "events",
+        "wordpress-style"
+    ],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Ali Harb",
+            "email": "harbzali@gmail.com"
+        }
+    ],
+    "require": {
+        "php": "^8.2|^8.3",
+        "illuminate/support": "^11.0|^12.0",
+        "illuminate/pipeline": "^11.0|^12.0",
+        "illuminate/view": "^11.0|^12.0",
+        "illuminate/console": "^11.0|^12.0",
+        "illuminate/container": "^11.0|^12.0"
     },
-    "files": [
-      "src/helpers.php"
-    ]
-  },
-  "autoload-dev": {
-    "psr-4": {
-      "Tests\\": "tests/"
+    "require-dev": {
+        "orchestra/testbench": "^9.5|^10.0",
+        "pestphp/pest": "^3.0",
+        "pestphp/pest-plugin-laravel": "^3.0",
+        "phpstan/phpstan": "^2.1",
+        "larastan/larastan": "^3.0",
+        "laravel/pint": "^1.24",
+        "friendsofphp/php-cs-fixer": "*",
+        "livewire/livewire": "^4.0",
+        "fruitcake/laravel-debugbar": "^4.0",
+        "laravel/pulse": "^1.2",
+        "filament/filament": "^4.0|^5.0"
+    },
+    "suggest": {
+        "alizharb/laravel-modular": "Build modular Laravel apps with zero configuration.",
+        "alizharb/laravel-themer": "A powerful theme engine for Laravel applications.",
+        "alizharb/laravel-modular-livewire": "Automatic Livewire component discovery and registration.",
+        "alizharb/laravel-modular-filament": "Filament v5 admin panel integration for modules.",
+        "alizharb/laravel-modular-js": "Zero-config JavaScript and assets management for modules.",
+        "alizharb/filament-modular-luncher": "Advanced Filament dashboard launcher for modular projects.",
+        "alizharb/filament-themer-luncher": "Theme management integration for Filament dashboards."
+    },
+    "autoload": {
+        "psr-4": {
+            "AlizHarb\\LaravelHooks\\": "src/"
+        },
+        "files": [
+            "src/helpers.php"
+        ]
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "AlizHarb\\LaravelHooks\\HookServiceProvider"
+            ],
+            "aliases": {
+                "Hook": "AlizHarb\\LaravelHooks\\Facades\\Hook"
+            }
+        }
+    },
+    "config": {
+        "sort-packages": true,
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        }
     }
-  },
-  "extra": {
-    "laravel": {
-      "providers": [
-        "AlizHarb\\LaravelHooks\\HookServiceProvider"
-      ],
-      "aliases": {
-        "Hook": "AlizHarb\\LaravelHooks\\Facades\\Hook"
-      }
-    }
-  },
-  "config": {
-    "sort-packages": true,
-    "allow-plugins": {
-      "pestphp/pest-plugin": true
-    }
-  },
-  "minimum-stability": "dev",
-  "prefer-stable": true
 }

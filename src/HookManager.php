@@ -20,10 +20,10 @@ class HookManager
 {
     use Macroable;
 
-    /** @var array<string, array<int, array<string, array{function: callable|string|array, accepted_args: int}>>> */
+    /** @var array<string, array<int, array<string, array{function: callable|string|array, accepted_args: int, validation?: string|\Closure}>>> */
     protected array $filters = [];
 
-    /** @var array<string, array<int, array<string, array{function: callable|string|array, accepted_args: int}>>> */
+    /** @var array<string, array<int, array<string, array{function: callable|string|array, accepted_args: int, validation?: string|\Closure}>>> */
     protected array $wildcardFilters = [];
 
     /** @var array<string, bool> */
@@ -62,6 +62,20 @@ class HookManager
     /** @var array<string, bool> */
     protected array $registeredMacros = [];
 
+    /** @var array<string, array<string, array{name: string, value: mixed, extra: array}>> */
+    protected array $virtualEnumCases = [];
+
+    /** @var array<string, mixed> */
+    protected array $context = [];
+
+    /** @var array<string, array<string, array{connection: ?string, queue: ?string}>> */
+    protected array $queuedListeners = [];
+
+    protected bool $isTracing = false;
+
+    /** @var array<int, array> */
+    protected array $traceLogs = [];
+
     public bool $isLoaded = false;
 
     /** @var array<string, int> */
@@ -78,7 +92,7 @@ class HookManager
     /**
      * Define strict signature for a hook.
      *
-     * @param  array<int, string>  $signature
+     * @param array<int, string> $signature
      */
     public function define(string|BackedEnum $hook, array $signature): self
     {
@@ -220,6 +234,11 @@ class HookManager
         return new PendingHookRegistration($this, $hookName, $id, $priority, true);
     }
 
+    public function validateListener(string $hook, string $id, int $priority, string|\Closure $rules): void
+    {
+        $this->filters[$hook][$priority][$id]['validation'] = $rules;
+    }
+
     /**
      * Check if a hook has any active listeners.
      */
@@ -292,23 +311,49 @@ class HookManager
      * @throws InvalidCallbackException
      * @throws HookSignatureMismatchException
      */
-    public function doAction(string|BackedEnum $hook, mixed ...$args): PendingHookCall
+    public function doAction(string|BackedEnum $hook, mixed ...$args): mixed
     {
         $hookName = $this->resolveHook($hook);
+        $value = $args[0] ?? null;
 
-        $execution = function () use ($hook, $args) {
-            $value = array_shift($args);
-            $this->applyFilters($hook, $value, ...$args);
+        $execution = function () use ($hook, &$args) {
+            $val = array_shift($args);
+
+            return $this->applyFilters($hook, $val, ...$args);
         };
 
         if ($this->isTransactional) {
             $this->isTransactional = false;
-            \Illuminate\Support\Facades\DB::transaction($execution);
+            $value = \Illuminate\Support\Facades\DB::transaction($execution);
         } else {
-            $execution();
+            $value = $execution();
         }
 
-        return new PendingHookCall($this, $hookName);
+        return $value;
+    }
+
+    /**
+     * Render a hook action, supporting fallbacks for Blade.
+     */
+    public function renderAction(string|BackedEnum $hook, mixed ...$args): ?string
+    {
+        $hookName = $this->resolveHook($hook);
+        $fallback = null;
+
+        // If the first argument after hook is a string and potentially a view
+        // And we have no listeners, we treat it as a fallback.
+        if (count($args) > 0 && is_string($args[0]) && ! $this->hasListeners($hookName)) {
+            $fallback = array_shift($args);
+            if (\Illuminate\Support\Facades\View::exists($fallback)) {
+                return (string) \Illuminate\Support\Facades\View::make($fallback, $args[0] ?? [], $args[1] ?? [])->render();
+            }
+            // Put it back if it doesn't look like a view
+            array_unshift($args, $fallback);
+        }
+
+        $result = $this->doAction($hook, ...$args);
+
+        return is_string($result) ? $result : null;
     }
 
     /**
@@ -398,7 +443,7 @@ class HookManager
         }
 
         foreach ($callbacksToRun as $priority => $callbacks) {
-            foreach ($callbacks as $callback) {
+            foreach ($callbacks as $id => $callback) {
                 try {
                     if (! is_callable($callback['function'])) {
                         if (is_string($callback['function']) && str_contains($callback['function'], '@')) {
@@ -412,8 +457,48 @@ class HookManager
                         throw InvalidCallbackException::notCallable($hookName);
                     }
 
+                    // Signature Enforcement (Premium Safety)
+                    if (config('hooks.strict_mode', false)) {
+                        $this->enforceStrictSignature($hookName, $callback['function'], (int) $callback['accepted_args'], count($args));
+                    }
+
+                    if (isset($this->queuedListeners[$hookName][$id])) {
+                        $config = $this->queuedListeners[$hookName][$id];
+                        $job = new \AlizHarb\LaravelHooks\Jobs\HookJob($hookName, $callback['function'], $args);
+
+                        if ($config['connection']) {
+                            $job->onConnection($config['connection']);
+                        }
+
+                        if ($config['queue']) {
+                            $job->onQueue($config['queue']);
+                        }
+
+                        dispatch($job);
+
+                        continue;
+                    }
+
                     $parameters = array_slice($args, 0, (int) $callback['accepted_args']);
+                    $before = is_scalar($args[0]) ? (string) $args[0] : gettype($args[0]);
+
                     $value = call_user_func_array($callback['function'], $parameters);
+
+                    // Tracing log
+                    if ($this->isTracing) {
+                        $after = is_scalar($value) ? (string) $value : gettype($value);
+                        if ($before !== $after) {
+                            $this->logMutation($hookName, $id, $before, $after);
+                        }
+                    }
+
+                    // Smart Validation
+                    if (isset($callback['validation'])) {
+                        if (! $this->validateResult($value, $callback['validation'])) {
+                            Log::warning("Hook [{$hookName}] listener [{$id}] returned invalid data. Falling back to previous value.");
+                            $value = $args[0]; // Fallback to original value
+                        }
+                    }
 
                     $args[0] = $value;
                 } catch (\Throwable $e) {
@@ -510,6 +595,159 @@ class HookManager
     public function model(string $modelClass): ModelHookBuilder
     {
         return new ModelHookBuilder($this, $modelClass);
+    }
+
+    /**
+     * Start an enum extension builder.
+     */
+    public function enum(string $enumClass): EnumHookBuilder
+    {
+        return new EnumHookBuilder($this, $enumClass);
+    }
+
+    /**
+     * Register a dynamic case for an enum.
+     */
+    public function registerEnumCase(string $enumClass, string $name, mixed $value, array $extra = []): void
+    {
+        $this->virtualEnumCases[$enumClass][$name] = [
+            'name' => $name,
+            'value' => $value,
+            'extra' => $extra,
+        ];
+    }
+
+    /**
+     * Get dynamic cases for an enum.
+     */
+    public function getEnumCases(string $enumClass): array
+    {
+        return $this->virtualEnumCases[$enumClass] ?? [];
+    }
+
+    /**
+     * Mark a listener to be executed on a queue.
+     */
+    public function markAsQueued(string $hook, string $id, ?string $connection = null, ?string $queue = null): void
+    {
+        $this->queuedListeners[$hook][$id] = [
+            'connection' => $connection,
+            'queue' => $queue,
+        ];
+    }
+
+    /**
+     * Validate a result against rules.
+     */
+    protected function validateResult(mixed $value, string|\Closure $rules): bool
+    {
+        if ($rules instanceof \Closure) {
+            return (bool) $rules($value);
+        }
+
+        $validator = \Illuminate\Support\Facades\Validator::make(
+            ['value' => $value],
+            ['value' => $rules]
+        );
+
+        return ! $validator->fails();
+    }
+
+    /**
+     * Set a context value for the current request cycle.
+     */
+    public function setContext(string $key, mixed $value): void
+    {
+        $this->context[$key] = $value;
+    }
+
+    /**
+     * Get a context value.
+     */
+    public function getContext(string $key, mixed $default = null): mixed
+    {
+        return $this->context[$key] ?? $default;
+    }
+
+    /**
+     * Check if context has a key.
+     */
+    public function hasContext(string $key): bool
+    {
+        return array_key_exists($key, $this->context);
+    }
+
+    /**
+     * Remove a context key.
+     */
+    public function forgetContext(string $key): void
+    {
+        unset($this->context[$key]);
+    }
+
+    /**
+     * Clear all context.
+     */
+    public function flushContext(): void
+    {
+        $this->context = [];
+    }
+
+    /**
+     * Map a Laravel event to a Hook.
+     */
+    public function bridge(string $event, string $hook): void
+    {
+        \Illuminate\Support\Facades\Event::listen($event, function (...$args) use ($hook) {
+            // If the first argument is an array and it's the only argument,
+            // we check if it's associative. If so, pass it as one item.
+            if (count($args) === 1 && is_array($args[0]) && ! array_is_list($args[0])) {
+                return $this->doAction($hook, $args[0]);
+            }
+
+            return $this->doAction($hook, ...$args);
+        });
+    }
+
+    /**
+     * Enable execution tracing.
+     */
+    public function enableTracing(): void
+    {
+        $this->isTracing = true;
+    }
+
+    /**
+     * Get and clear recent trace logs.
+     */
+    public function getRecentTraceLogs(): array
+    {
+        $logs = $this->traceLogs;
+        $this->traceLogs = [];
+
+        return $logs;
+    }
+
+    protected function logMutation(string $hook, string $listener, string $before, string $after): void
+    {
+        // Find existing log for this request or create one
+        // For simplicity in this demo, we store them in a flat array
+        $this->traceLogs[] = [
+            'hook' => $hook,
+            'time' => round((microtime(true) - \LARAVEL_START) * 1000, 2),
+            'mutations' => [[
+                'listener' => $listener,
+                'before' => $before,
+                'after' => $after,
+            ]],
+        ];
+    }
+
+    protected function enforceStrictSignature(string $hook, callable $callback, int $accepted, int $provided): void
+    {
+        if ($provided < $accepted) {
+            throw new HookSignatureMismatchException("Hook [{$hook}] expects {$accepted} arguments, but only {$provided} provided.");
+        }
     }
 
     /**

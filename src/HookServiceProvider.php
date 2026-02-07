@@ -13,6 +13,7 @@ use AlizHarb\LaravelHooks\Commands\HookIdeHelperCommand;
 use AlizHarb\LaravelHooks\Commands\HookInspectCommand;
 use AlizHarb\LaravelHooks\Commands\HookListCommand;
 use AlizHarb\LaravelHooks\Commands\HookMonitorCommand;
+use AlizHarb\LaravelHooks\Commands\HookTraceCommand;
 use AlizHarb\LaravelHooks\Debugbar\HookCollector;
 use Illuminate\Foundation\Console\AboutCommand;
 use Illuminate\Support\ServiceProvider;
@@ -71,6 +72,7 @@ class HookServiceProvider extends ServiceProvider
                 HookIdeHelperCommand::class,
                 HookMonitorCommand::class,
                 HookGenerateDocsCommand::class,
+                HookTraceCommand::class,
             ]);
         }
 
@@ -99,6 +101,6 @@ class HookServiceProvider extends ServiceProvider
             $this->app->make(LivewireHookBridge::class)->register();
         }
 
-        AboutCommand::add('Laravel Hooks', fn () => ['Version' => '1.2.0', 'Author' => 'Ali Harb']);
+        AboutCommand::add('Laravel Hooks', fn () => ['Version' => '1.2.1', 'Author' => 'Ali Harb']);
     }
 }

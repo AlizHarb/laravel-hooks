@@ -9,7 +9,7 @@ use AlizHarb\LaravelHooks\Attributes\HookFilter;
  * --------------------------------------------------------------------------
  * ATTRIBUTE-BASED REGISTRATION
  * The package automatically discovers these in your scan_paths.
- * --------------------------------------------------------------------------
+ * --------------------------------------------------------------------------.
  */
 class AnalyticsSubscriber
 {

@@ -12,9 +12,9 @@ class HookAction
     /**
      * Create a new HookAction instance.
      *
-     * @param  string  $hook  The hook name.
-     * @param  int  $priority  Priority defaults to 10.
-     * @param  int  $acceptedArgs  Number of accepted arguments.
+     * @param string $hook the hook name
+     * @param int $priority priority defaults to 10
+     * @param int $acceptedArgs number of accepted arguments
      */
     public function __construct(
         public string $hook,

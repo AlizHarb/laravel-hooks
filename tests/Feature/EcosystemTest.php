@@ -33,6 +33,6 @@ test('deprecations log warnings', function () {
 test('eloquent bridge dispatches generic hooks', function () {
     // We can't easily test the event listener binding without mocking the generic event system fully,
     // but we can verify the class exists and acts.
-    $bridge = new \AlizHarb\LaravelHooks\Bridge\EloquentHookBridge;
+    $bridge = new \AlizHarb\LaravelHooks\Bridge\EloquentHookBridge();
     expect($bridge)->toBeInstanceOf(\AlizHarb\LaravelHooks\Bridge\EloquentHookBridge::class);
 });

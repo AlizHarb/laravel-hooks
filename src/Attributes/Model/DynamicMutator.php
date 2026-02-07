@@ -6,7 +6,7 @@ namespace AlizHarb\LaravelHooks\Attributes\Model;
 
 use Attribute;
 
-#[Attribute(Attribute::TARGET_METHOD)]
+#[Attribute(Attribute::TARGET_ALL | Attribute::IS_REPEATABLE)]
 class DynamicMutator
 {
     public function __construct(

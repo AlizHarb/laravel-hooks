@@ -6,11 +6,11 @@ namespace AlizHarb\LaravelHooks\Attributes\Model;
 
 use Attribute;
 
-#[Attribute(Attribute::TARGET_CLASS | Attribute::IS_REPEATABLE)]
+#[Attribute(Attribute::TARGET_ALL | Attribute::IS_REPEATABLE)]
 class DynamicCast
 {
     public function __construct(
-        public string $attribute,
-        public string $type
+        public ?string $attribute = null,
+        public string $type = 'string'
     ) {}
 }

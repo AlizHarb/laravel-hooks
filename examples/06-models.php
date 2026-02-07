@@ -9,7 +9,7 @@ use Illuminate\Database\Capsule\Manager as Capsule;
 use Illuminate\Database\Eloquent\Model;
 
 // Setup Eloquent for standalone example
-$capsule = new Capsule;
+$capsule = new Capsule();
 $capsule->addConnection([
     'driver' => 'sqlite',
     'database' => ':memory:',

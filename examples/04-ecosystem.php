@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Model;
  * --------------------------------------------------------------------------
  * ELOQUENT INTEGRATION
  * Using the HasHooks trait for model-specific tags.
- * --------------------------------------------------------------------------
+ * --------------------------------------------------------------------------.
  */
 class Post extends Model
 {
@@ -28,7 +28,7 @@ class Post extends Model
  * --------------------------------------------------------------------------
  * FILAMENT INTEGRATION (v4/v5)
  * Using the InteractsWithHooks trait for modular UIs.
- * --------------------------------------------------------------------------
+ * --------------------------------------------------------------------------.
  */
 
 namespace App\Filament\Resources;
@@ -61,7 +61,7 @@ class UserResource extends Resource
     }
 }
 
-/**
+/*
  * EXTERNAL MODULE (Example of how to consume the hooks)
  */
 // Hook::addFilter('filament.table.UserResource', function (Table $table) {

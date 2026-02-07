@@ -27,12 +27,12 @@ class OrderData
 Hook::define('order.shipped', [OrderData::class]);
 
 // This works:
-Hook::doAction('order.shipped', new OrderData);
+Hook::doAction('order.shipped', new OrderData());
 
 // This would throw HookSignatureMismatchException:
 // Hook::doAction('order.shipped', 'not-a-dto');
 
-/**
+/*
  * 3. Circuit Breaker (v1.2.0)
  * failsafe hooks.
  */
@@ -49,7 +49,7 @@ if (Hook::isMuted('flaky.service')) {
     echo 'Circuit breaker tripped!';
 }
 
-/**
+/*
  * 4. Blade Fallbacks (v1.2.0)
  * See docs/integrations.md for @hook('name', 'fallback.view')
  */

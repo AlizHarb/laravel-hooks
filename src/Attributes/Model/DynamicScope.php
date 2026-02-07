@@ -6,11 +6,11 @@ namespace AlizHarb\LaravelHooks\Attributes\Model;
 
 use Attribute;
 
-#[Attribute(Attribute::TARGET_CLASS | Attribute::IS_REPEATABLE)]
+#[Attribute(Attribute::TARGET_ALL | Attribute::IS_REPEATABLE)]
 class DynamicScope
 {
     public function __construct(
-        public string $name,
+        public ?string $name = null,
         public ?string $callback = null
     ) {}
 }

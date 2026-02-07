@@ -21,7 +21,7 @@ class HookGenerateDocsCommand extends Command
 
         $this->info("Scanning [{$path}] for hook calls...");
 
-        $finder = new Finder;
+        $finder = new Finder();
         $finder->files()->in($path)->name('*.php');
 
         $hooks = [];

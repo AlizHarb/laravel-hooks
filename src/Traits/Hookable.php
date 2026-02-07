@@ -7,7 +7,7 @@ namespace AlizHarb\LaravelHooks\Traits;
 use AlizHarb\LaravelHooks\Facades\Hook;
 
 /**
- * Trait Hookable
+ * Trait Hookable.
  *
  * Allows any class to easily dispatch hooks with instance context.
  */
@@ -16,8 +16,8 @@ trait Hookable
     /**
      * Dispatch an action with this instance as the first argument.
      *
-     * @param  string  $tag  The name of the action.
-     * @param  mixed  ...$args  Additional arguments.
+     * @param string $tag the name of the action
+     * @param mixed ...$args Additional arguments.
      */
     protected function fireAction(string $tag, mixed ...$args): void
     {
@@ -27,8 +27,8 @@ trait Hookable
     /**
      * Apply filter with this instance as the value.
      *
-     * @param  string  $tag  The name of the filter.
-     * @param  mixed  ...$args  Additional arguments.
+     * @param string $tag the name of the filter
+     * @param mixed ...$args Additional arguments.
      */
     protected function applyFilter(string $tag, mixed ...$args): mixed
     {

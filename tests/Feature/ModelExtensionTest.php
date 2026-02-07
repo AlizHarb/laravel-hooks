@@ -154,7 +154,7 @@ class ModelExtensionTest extends TestCase
             unset($model->slug);
         });
 
-        $model = new ExtensionTestModel;
+        $model = new ExtensionTestModel();
         $model->slug = 'Hello World';
         $model->save();
 
@@ -185,6 +185,8 @@ class ModelExtensionTest extends TestCase
 if (! class_exists(ExtensionTestModel::class)) {
     class ExtensionTestModel extends Model
     {
+        use \AlizHarb\LaravelHooks\Traits\HasDynamicHooks;
+
         protected $table = 'extension_test_models';
 
         protected $guarded = [];
@@ -194,6 +196,8 @@ if (! class_exists(ExtensionTestModel::class)) {
 if (! class_exists(AnotherModel::class)) {
     class AnotherModel extends Model
     {
+        use \AlizHarb\LaravelHooks\Traits\HasDynamicHooks;
+
         protected $table = 'another_models';
 
         protected $guarded = [];

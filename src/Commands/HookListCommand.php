@@ -12,7 +12,7 @@ use Illuminate\Console\Command;
  */
 class HookListCommand extends Command
 {
-    protected $signature = 'hook:list';
+    protected $signature = 'hook:list {--search= : Filter by hook name}';
 
     protected $description = 'List all registered hooks and their listeners';
 
@@ -22,9 +22,20 @@ class HookListCommand extends Command
     public function handle(HookManager $manager): int
     {
         $hooks = $manager->getFilters();
+        $search = $this->option('search');
+
+        if (empty($hooks)) {
+            $this->warn('No hooks registered.');
+
+            return self::SUCCESS;
+        }
 
         $rows = [];
         foreach ($hooks as $name => $priorities) {
+            if ($search && ! str_contains($name, $search)) {
+                continue;
+            }
+
             foreach ($priorities as $priority => $callbacks) {
                 foreach ($callbacks as $callback) {
                     $callbackName = 'Closure';
@@ -43,6 +54,12 @@ class HookListCommand extends Command
                     ];
                 }
             }
+        }
+
+        if (empty($rows)) {
+            $this->warn("No hooks found matching [{$search}].");
+
+            return self::SUCCESS;
         }
 
         $this->table(

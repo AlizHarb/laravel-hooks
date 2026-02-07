@@ -35,10 +35,9 @@ class HookMonitorCommand extends Command
         });
 
         // Loop indefinitely to keep the process alive
-        // @phpstan-ignore-next-line
+        /* @phpstan-ignore-next-line */
         while (true) {
             usleep(100000);
         }
-
     }
 }

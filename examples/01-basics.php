@@ -2,7 +2,7 @@
 
 use AlizHarb\LaravelHooks\Facades\Hook;
 
-/**
+/*
  * --------------------------------------------------------------------------
  * CORE ACTIONS
  * Actions allow you to "do something" at a specific point in execution.
@@ -24,7 +24,7 @@ Hook::addAction('order.completed', function ($orderId) {
 // Execute the action
 Hook::doAction('order.completed', 1024);
 
-/**
+/*
  * --------------------------------------------------------------------------
  * CORE FILTERS
  * Filters allow you to intercept and modify data.

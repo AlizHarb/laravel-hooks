@@ -7,10 +7,10 @@ use AlizHarb\LaravelHooks\Facades\Hook;
 use stdClass;
 
 test('filament bridge application methods trigger filters', function () {
-    $table = new stdClass;
-    $schema = new stdClass;
-    $infolist = new stdClass;
-    $action = new stdClass;
+    $table = new stdClass();
+    $schema = new stdClass();
+    $infolist = new stdClass();
+    $action = new stdClass();
 
     Hook::addFilter('filament.table.UserResource', function ($t) {
         $t->filtered = true;
@@ -40,11 +40,11 @@ test('filament bridge application methods trigger filters', function () {
 });
 
 test('filament bridge application detects context', function () {
-    $table = new class
+    $table = new class()
     {
         public function getLivewire()
         {
-            return new stdClass;
+            return new stdClass();
         }
     };
 

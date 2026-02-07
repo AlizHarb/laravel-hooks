@@ -5,32 +5,71 @@ declare(strict_types=1);
 namespace AlizHarb\LaravelHooks;
 
 use Closure;
-use Illuminate\Database\Eloquent\Casts\Attribute;
-use Illuminate\Database\Eloquent\Scope;
+use Illuminate\Database\Eloquent\Relations\Relation;
 
 class ModelHookBuilder
 {
-    public function __construct(
-        protected HookManager $manager,
-        protected string $modelClass
-    ) {}
+    protected HookManager $manager;
+    protected string $modelClass;
+
+    public function __construct(HookManager $manager, string $modelClass)
+    {
+        $this->manager = $manager;
+        $this->modelClass = $modelClass;
+    }
 
     /**
-     * Register a dynamic relation on the model.
+     * Get the hook name for this model (standardized).
+     */
+    protected function getHookName(): string
+    {
+        return strtolower(class_basename($this->modelClass));
+    }
+
+    /**
+     * Register a dynamic relation for the model.
      *
      * @return $this
      */
     public function relation(string $name, Closure $callback): self
     {
-        if (method_exists($this->modelClass, 'resolveRelationUsing')) {
-            ($this->modelClass)::resolveRelationUsing($name, $callback);
-        }
+        $hookName = $this->getHookName();
+
+        $this->manager->addFilter("model.{$hookName}.relation.{$name}", function ($value, $model = null) use ($callback) {
+            return $callback($model);
+        }, 10, 2);
+
+        // Add filter to attribute too, so $model->posts works even if not loaded/declared
+        $this->manager->addFilter("model.{$hookName}.attribute.{$name}", function ($value, $model = null) use ($name, $callback) {
+            if ($model && $model->relationLoaded($name)) {
+                return $model->getRelation($name);
+            }
+
+            if (! $model) {
+                return $value;
+            }
+
+            // Simple recursion guard for specific relation
+            $relation = $callback($model);
+
+            if ($relation instanceof Relation) {
+                return $relation->getResults();
+            }
+
+            return $relation;
+        }, 10, 2);
+
+        // Register a macro on the model to handle the relation call (method level)
+        ($this->modelClass)::macro($name, function () use ($callback) {
+            /* @var \Illuminate\Database\Eloquent\Model|static $this */
+            return $callback($this);
+        });
 
         return $this;
     }
 
     /**
-     * Register a dynamic scope on the model.
+     * Register a dynamic scope for the model.
      *
      * @return $this
      */
@@ -42,52 +81,40 @@ class ModelHookBuilder
     }
 
     /**
-     * Register a model event listener.
+     * Register a dynamic global scope for the model.
+     *
+     * @return $this
+     */
+    public function globalScope(string $name, Closure $callback): self
+    {
+        ($this->modelClass)::addGlobalScope($name, $callback);
+
+        return $this;
+    }
+
+    /**
+     * Register a dynamic model event listener.
      *
      * @return $this
      */
     public function on(string $event, Closure $callback): self
     {
-        if (method_exists($this->modelClass, $event)) {
-            ($this->modelClass)::$event($callback);
-        }
+        ($this->modelClass)::$event($callback);
 
         return $this;
     }
 
     /**
-     * Register a dynamic global scope on the model.
-     *
-     * @return $this
-     */
-    public function globalScope(string $name, Closure|Scope $scope): self
-    {
-        if (method_exists($this->modelClass, 'addGlobalScope')) {
-            ($this->modelClass)::addGlobalScope($name, $scope);
-        }
-
-        return $this;
-    }
-
-    /**
-     * Register a dynamic cast on the model.
+     * Register a dynamic cast for the model.
      *
      * @return $this
      */
     public function cast(string $column, string $cast): self
     {
-        $handler = function ($model) use ($column, $cast) {
-            $model->mergeCasts([$column => $cast]);
-        };
+        $this->manager->addFilter("model.{$this->getHookName()}.casts", function ($casts) use ($column, $cast) {
+            $casts[$column] = $cast;
 
-        ($this->modelClass)::retrieved($handler);
-
-        ($this->modelClass)::saving(function ($model) use ($column, $cast) {
-            $model->mergeCasts([$column => $cast]);
-
-            // If the model is being saved and have the attribute as an array,
-            // but Laravel hasn't processed the cast yet (common with dynamic casts),
-            // we might need to force it.
+            return $casts;
         });
 
         return $this;
@@ -100,101 +127,101 @@ class ModelHookBuilder
      */
     public function accessor(string $name, Closure $callback): self
     {
-        $handler = function ($model) use ($name, $callback) {
-            $model->setRelation($name, $callback($model));
-        };
-
-        ($this->modelClass)::retrieved($handler);
-        ($this->modelClass)::created($handler);
-        ($this->modelClass)::saving($handler);
+        $this->manager->addFilter("model.{$this->getHookName()}.attribute.{$name}", function ($value, $model = null) use ($callback) {
+            return $callback($model);
+        }, 10, 2);
 
         return $this;
     }
 
     /**
      * Register a dynamic attribute (accessor/mutator) for the model.
-     * Note: This works by hooking into the retrieved instance.
      *
      * @return $this
      */
     public function attribute(string $name, ?Closure $get = null, ?Closure $set = null): self
     {
+        $hookName = $this->getHookName();
+
         if ($get) {
-            $this->accessor($name, $get);
+            $this->manager->addFilter("model.{$hookName}.attribute.{$name}", function ($value, $model = null) use ($get) {
+                return $get($model, $value);
+            }, 10, 2);
         }
 
         if ($set) {
-            $this->on('saving', function ($model) use ($name, $set) {
-                if (isset($model->$name)) {
-                    $set($model, $model->$name);
-                }
-            });
+            $this->manager->addFilter("model.{$hookName}.set_attribute.{$name}", function ($value, $model = null) use ($set) {
+                return $set($model, $value);
+            }, 10, 2);
         }
 
         return $this;
     }
 
     /**
-     * Register a dynamic method on the model.
-     * Requires the model to use the HasDynamicHooks trait (or Macroable).
+     * Register a dynamic method for the model.
      *
      * @return $this
      */
     public function method(string $name, Closure $callback): self
     {
-        if (method_exists($this->modelClass, 'macro')) {
-            ($this->modelClass)::macro($name, $callback);
-        }
+        ($this->modelClass)::macro($name, $callback);
 
         return $this;
     }
 
     /**
-     * Add fillable attributes to the model.
+     * Register fillable attributes for the model.
      *
      * @return $this
      */
     public function fillable(array $attributes): self
     {
-        $this->on('retrieved', fn ($model) => $model->mergeFillable($attributes));
-        $this->on('saving', fn ($model) => $model->mergeFillable($attributes));
+        $this->on('retrieved', function ($model) use ($attributes) {
+            $model->mergeFillable($attributes);
+        });
 
         return $this;
     }
 
     /**
-     * Add guarded attributes to the model.
+     * Register guarded attributes for the model.
      *
      * @return $this
      */
     public function guarded(array $attributes): self
     {
-        $this->on('retrieved', fn ($model) => $model->mergeGuarded($attributes));
-        $this->on('saving', fn ($model) => $model->mergeGuarded($attributes));
+        $this->on('retrieved', function ($model) use ($attributes) {
+            $model->mergeGuarded($attributes);
+        });
 
         return $this;
     }
 
     /**
-     * Add hidden attributes to the model serialization.
-     *
-     * @return $this
-     */
-    public function hidden(array $attributes): self
-    {
-        $this->on('retrieved', fn ($model) => $model->makeHidden($attributes));
-
-        return $this;
-    }
-
-    /**
-     * Add visible attributes to the model serialization.
+     * Register visible attributes for the model.
      *
      * @return $this
      */
     public function visible(array $attributes): self
     {
-        $this->on('retrieved', fn ($model) => $model->makeVisible($attributes));
+        $this->on('retrieved', function ($model) use ($attributes) {
+            $model->setVisible(array_merge($model->getVisible(), $attributes));
+        });
+
+        return $this;
+    }
+
+    /**
+     * Register hidden attributes for the model.
+     *
+     * @return $this
+     */
+    public function hidden(array $attributes): self
+    {
+        $this->on('retrieved', function ($model) use ($attributes) {
+            $model->setHidden(array_merge($model->getHidden(), $attributes));
+        });
 
         return $this;
     }

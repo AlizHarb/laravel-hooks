@@ -18,21 +18,7 @@ class BladeDirectives
     public static function register(): void
     {
         Blade::directive('hook', function ($expression) {
-            $parts = explode(',', $expression, 2);
-            $hook = trim($parts[0]);
-            $fallback = isset($parts[1]) ? trim($parts[1]) : null;
-
-            if ($fallback) {
-                return "<?php 
-                    if (\AlizHarb\LaravelHooks\Facades\Hook::hasListeners($hook)) {
-                        \AlizHarb\LaravelHooks\Facades\Hook::doAction($hook);
-                    } else {
-                        echo view($fallback)->render();
-                    }
-                ?>";
-            }
-
-            return "<?php \AlizHarb\LaravelHooks\Facades\Hook::doAction($expression); ?>";
+            return "<?php echo \AlizHarb\LaravelHooks\Facades\Hook::renderAction($expression); ?>";
         });
 
         Blade::directive('filter', function ($expression) {
@@ -50,7 +36,15 @@ class BladeDirectives
             $condition = trim($parts[0]);
             $args = trim($parts[1]);
 
-            return "<?php if($condition) \AlizHarb\LaravelHooks\Facades\Hook::doAction($args); ?>";
+            return "<?php if($condition) echo \AlizHarb\LaravelHooks\Facades\Hook::renderAction($args); ?>";
+        });
+
+        Blade::directive('hookBlock', function ($expression) {
+            return "<?php if (! \AlizHarb\LaravelHooks\Facades\Hook::hasListeners($expression)): ?>";
+        });
+
+        Blade::directive('endhookBlock', function () {
+            return '<?php endif; ?>';
         });
     }
 }

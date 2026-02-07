@@ -47,10 +47,10 @@ class AttributeModelExtensionTest extends TestCase
     {
         $model = AttrTestModel::create([
             'name' => 'Cast Test',
-            'config' => json_encode(['enabled' => true]),
+            'config' => ['enabled' => true],
         ]);
 
-        $fetched = AttrTestModel::find($model->id);
+        $fetched = AttrTestModel::find($model->id)->refresh();
 
         $this->assertIsArray($fetched->config);
         $this->assertTrue($fetched->config['enabled']);
@@ -64,8 +64,9 @@ class AttributeModelExtensionTest extends TestCase
     }
 }
 
-#[DynamicRelation(name: 'posts', type: 'hasMany', related: AttrTestPost::class)]
+#[DynamicRelation(name: 'posts', type: 'hasMany', related: AttrTestPost::class, foreignKey: 'attr_test_model_id')]
 #[DynamicCast(attribute: 'config', type: 'array')]
+#[DynamicAccessor(name: 'display_name')]
 class AttrTestModel extends Model
 {
     use HasDynamicHooks;
@@ -74,7 +75,6 @@ class AttrTestModel extends Model
 
     protected $guarded = [];
 
-    #[DynamicAccessor(name: 'display_name')]
     public function getDisplayNameAttribute()
     {
         return $this->name.' (from attr)';
@@ -83,6 +83,8 @@ class AttrTestModel extends Model
 
 class AttrTestPost extends Model
 {
+    use HasDynamicHooks;
+
     protected $table = 'attr_test_posts';
 
     protected $guarded = [];

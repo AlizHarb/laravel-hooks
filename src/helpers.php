@@ -8,7 +8,7 @@ if (! function_exists('do_action')) {
     /**
      * Dispatch an action hook.
      *
-     * @param  mixed  ...$args
+     * @param mixed ...$args
      */
     function do_action(string $hook, ...$args): void
     {
@@ -20,8 +20,8 @@ if (! function_exists('apply_filters')) {
     /**
      * Apply filter hooks to a value.
      *
-     * @param  mixed  $value
-     * @param  mixed  ...$args
+     * @param mixed $value
+     * @param mixed ...$args
      * @return mixed
      */
     function apply_filters(string $hook, $value, ...$args)
@@ -34,7 +34,7 @@ if (! function_exists('hook')) {
     /**
      * Fluent helper to interact with the hook system.
      *
-     * @param  mixed|null  $scope
+     * @param mixed|null $scope
      * @return \AlizHarb\LaravelHooks\HookManager|\AlizHarb\LaravelHooks\ScopedHookManager
      */
     function hook($scope = null)

@@ -23,6 +23,7 @@ class RoadmapFeaturesTest extends TestCase
         $count = 0;
         Hook::addAction('failing.hook', function () use (&$count) {
             $count++;
+
             throw new \Exception('Boom');
         });
         Hook::setGraceful('failing.hook');

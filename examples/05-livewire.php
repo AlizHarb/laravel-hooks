@@ -9,7 +9,7 @@ use Livewire\Component;
  * --------------------------------------------------------------------------
  * LIVEWIRE INTEGRATION
  * Using the InteractsWithLivewireHooks trait for reactive extensions.
- * --------------------------------------------------------------------------
+ * --------------------------------------------------------------------------.
  */
 class SearchUsers extends Component
 {
@@ -34,7 +34,7 @@ class SearchUsers extends Component
     }
 }
 
-/**
+/*
  * CONSUMING MODULE (Example)
  * Listen to the hook from another module.
  */

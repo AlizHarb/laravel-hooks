@@ -19,7 +19,7 @@ trait InteractsWithLivewireHooks
     /**
      * Hook into the mount lifecycle.
      *
-     * @param  mixed  ...$args
+     * @param mixed ...$args
      */
     public function mountInteractsWithLivewireHooks(...$args): void
     {
@@ -37,7 +37,7 @@ trait InteractsWithLivewireHooks
     /**
      * Hook into the rendered lifecycle.
      *
-     * @param  mixed  $view
+     * @param mixed $view
      */
     public function renderedInteractsWithLivewireHooks($view): void
     {
@@ -47,7 +47,7 @@ trait InteractsWithLivewireHooks
     /**
      * Hook into the updating lifecycle.
      *
-     * @param  mixed  $value
+     * @param mixed $value
      */
     public function updatingInteractsWithLivewireHooks(string $name, $value): void
     {
@@ -57,7 +57,7 @@ trait InteractsWithLivewireHooks
     /**
      * Hook into the updated lifecycle.
      *
-     * @param  mixed  $value
+     * @param mixed $value
      */
     public function updatedInteractsWithLivewireHooks(string $name, $value): void
     {
@@ -67,7 +67,7 @@ trait InteractsWithLivewireHooks
     /**
      * Fire a Livewire-specific hook.
      *
-     * @param  mixed  ...$args
+     * @param mixed ...$args
      */
     protected function fireLivewireHook(string $event, ...$args): void
     {

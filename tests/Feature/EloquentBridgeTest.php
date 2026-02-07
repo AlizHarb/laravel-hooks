@@ -33,7 +33,7 @@ test('eloquent bridge dispatches model-specific hooks', function () {
         $capturedHooks[] = $hook;
     });
 
-    $user = new TestUser;
+    $user = new TestUser();
 
     // Simulate Eloquent event
     Event::dispatch('eloquent.saved: '.TestUser::class, [$user]);
@@ -55,11 +55,11 @@ test('eloquent bridge respects excludes', function () {
     });
 
     // Case 1: Allowed model
-    Event::dispatch('eloquent.saved: '.TestUser::class, [new TestUser]);
+    Event::dispatch('eloquent.saved: '.TestUser::class, [new TestUser()]);
     expect($capturedHooks)->toContain('model.testuser.saved: '.TestUser::class);
 
     // Case 2: Excluded model
     $capturedHooks = [];
-    Event::dispatch('eloquent.saved: '.TestPost::class, [new TestPost]);
+    Event::dispatch('eloquent.saved: '.TestPost::class, [new TestPost()]);
     expect($capturedHooks)->toBeEmpty();
 });

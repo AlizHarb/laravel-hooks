@@ -42,7 +42,7 @@ class HookDiscoverer
      */
     protected function scanDirectory(string $path): void
     {
-        $finder = new Finder;
+        $finder = new Finder();
         $finder->files()->in($path)->name('*.php');
 
         foreach ($finder as $file) {
